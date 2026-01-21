@@ -26,10 +26,11 @@ logging.basicConfig(
 logger = logging.getLogger("Main")
 
 
-def run_api(host: str = "0.0.0.0", port: int = 5000, debug: bool = True):
+def run_api(host: str = "127.0.0.1", port: int = 5000, debug: bool = True):
     """Inicia a API Flask"""
     logger.info(f"🚀 Iniciando Instagram Intelligence System 2026...")
-    logger.info(f"📡 Servidor: http://{host}:{port}")
+    display_host = "localhost" if host == "127.0.0.1" or host == "0.0.0.0" else host
+    logger.info(f"📡 Servidor: http://{display_host}:{port}")
     
     try:
         from api.flask_api_fixed import app, socketio
@@ -91,8 +92,8 @@ def main():
     )
     parser.add_argument(
         "--host",
-        default="0.0.0.0",
-        help="Host para o servidor (default: 0.0.0.0)"
+        default="127.0.0.1",
+        help="Host para o servidor (default: 127.0.0.1)"
     )
     parser.add_argument(
         "--port",
