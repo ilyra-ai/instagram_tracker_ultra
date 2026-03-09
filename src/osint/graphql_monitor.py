@@ -225,7 +225,7 @@ class DocIdDatabase:
             """, (query_name,))
             
             records = []
-            for row in cursor.fetchall():
+            for row in cursor:
                 records.append(DocIdRecord(
                     doc_id=row[0],
                     query_name=row[1],
@@ -931,7 +931,7 @@ class GraphQLMonitor:
             cursor = conn.cursor()
             
             cursor.execute("SELECT DISTINCT query_name FROM doc_ids")
-            queries = [row[0] for row in cursor.fetchall()]
+            queries = [row[0] for row in cursor]
             
             for query in queries:
                 doc_ids = self.database.get_doc_ids_for_query(query)
@@ -977,7 +977,7 @@ class GraphQLMonitor:
                 LIMIT 10
             """)
             
-            for row in cursor.fetchall():
+            for row in cursor:
                 report['alerts'].append({
                     'type': row[0],
                     'message': row[1],
