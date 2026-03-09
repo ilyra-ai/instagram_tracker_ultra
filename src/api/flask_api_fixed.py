@@ -6,6 +6,11 @@ Usa os novos sistemas de scraping sem APIs descontinuadas
 import os
 import sys
 import logging
+from dotenv import load_dotenv
+from werkzeug.security import check_password_hash
+
+# Carregar variáveis de ambiente
+load_dotenv()
 
 # Adicionar pasta src ao path para imports funcionarem
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
@@ -1277,11 +1282,18 @@ def authenticate():
         username = data.get('username', '').strip()
         password = data.get('password', '')
         
-        # Credenciais válidas
-        VALID_USERNAME = 'douglas.mosken'
-        VALID_PASSWORD = 'Inst123@'
+        # Obter credenciais das variáveis de ambiente
+        VALID_USERNAME = os.getenv('ADMIN_USERNAME')
+        VALID_PASSWORD_HASH = os.getenv('ADMIN_PASSWORD_HASH')
+
+        if not VALID_USERNAME or not VALID_PASSWORD_HASH:
+            logger.error("❌ ADMIN_USERNAME ou ADMIN_PASSWORD_HASH não configurado no ambiente")
+            return jsonify({
+                'success': False,
+                'error': 'Erro de configuração de segurança do servidor'
+            }), 500
         
-        if username == VALID_USERNAME and password == VALID_PASSWORD:
+        if username == VALID_USERNAME and check_password_hash(VALID_PASSWORD_HASH, password):
             logger.info(f"✅ Login bem-sucedido para usuário: {username}")
             return jsonify({
                 'success': True,
