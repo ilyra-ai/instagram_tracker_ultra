@@ -23,18 +23,14 @@ except ImportError:
 # Import cache manager para decorators
 try:
     try:
-        from core.cache_manager import cached, with_backoff_jitter
+        from core.cache_manager import cached
     except ImportError:
-        from cache_manager import cached, with_backoff_jitter
+        from cache_manager import cached
     CACHE_AVAILABLE = True
 except ImportError:
     CACHE_AVAILABLE = False
     # Fallback: decorators que não fazem nada
     def cached(ttl=600, key_prefix=""):
-        def decorator(func):
-            return func
-        return decorator
-    def with_backoff_jitter(max_attempts=5, base_delay=1.0, max_delay=60.0, jitter=0.5):
         def decorator(func):
             return func
         return decorator
