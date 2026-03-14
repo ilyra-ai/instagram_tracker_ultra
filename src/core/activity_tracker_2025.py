@@ -207,7 +207,7 @@ class ActivityTracker2025:
             # Login opcional (melhora significativamente os resultados)
             if login_username and login_password:
                 self.logger.info(f"🔐 Realizando login com @{login_username}...")
-                success = self.scraper.login_optional(login_username, login_password)
+                success = await self.scraper.login_optional_async(login_username, login_password)
                 if success:
                     self.logger.info("✅ Login realizado com sucesso")
                 else:
@@ -217,7 +217,7 @@ class ActivityTracker2025:
             
             # 1. Obter lista de 'Seguindo' (pessoas que o alvo segue)
             self.logger.info(f"👥 Obtendo lista de quem @{target_username} segue...")
-            following_list = self.scraper.get_following_list(target_username, limit=max_following)
+            following_list = await self.scraper.get_following_list_async(target_username, limit=max_following)
             
             potential_targets = [u['username'] for u in following_list if u.get('username')]
             self.logger.info(f"   └── {len(potential_targets)} perfis seguidos obtidos")
@@ -227,7 +227,7 @@ class ActivityTracker2025:
             
             if scan_own_posts_for_interactors:
                 self.logger.info(f"📸 Analisando posts de @{target_username} para encontrar interatores...")
-                user_posts = self.scraper.get_user_posts(target_username, limit=10)
+                user_posts = await self.scraper.get_user_posts_async(target_username, limit=10)
                 
                 if isinstance(user_posts, list):
                     for post in user_posts:
@@ -272,7 +272,7 @@ class ActivityTracker2025:
             return self.activities
         
         finally:
-            self.cleanup()
+            await self.cleanup()
 
     async def _extract_post_interactors(self, post: Dict[str, Any]) -> Set[str]:
         """
@@ -324,7 +324,7 @@ class ActivityTracker2025:
         """
         try:
             # Obter posts recentes do perfil
-            posts = self.scraper.get_user_posts(profile_username, limit=max_posts)
+            posts = await self.scraper.get_user_posts_async(profile_username, limit=max_posts)
             
             if not isinstance(posts, list) or not posts:
                 self.logger.debug(f"   └── Nenhum post encontrado para @{profile_username}")
@@ -856,10 +856,10 @@ class ActivityTracker2025:
         sorted_ranking = sorted(ranking.values(), key=lambda x: x['score'], reverse=True)
         return sorted_ranking
 
-    def cleanup(self) -> None:
+    async def cleanup(self) -> None:
         """Limpa recursos e fecha conexões"""
         try:
-            self.scraper.cleanup()
+            await self.scraper.cleanup_async()
             # Limpar caches se necessário
             # self._likers_cache.clear()
             # self._commenters_cache.clear()
@@ -885,7 +885,7 @@ class ActivityTracker2025:
         """
         try:
             self.logger.info(f"📍 Rastreando locais de @{target_username}...")
-            posts = self.scraper.get_user_posts(target_username, limit=limit)
+            posts = await self.scraper.get_user_posts_async(target_username, limit=limit)
             
             locations: Dict[str, Dict[str, Any]] = {}
             

@@ -715,7 +715,11 @@ class InstagramScraper2025:
         return True
 
     def login_optional(self, username=None, password=None):
-        """Login opcional usando Nodriver (CDP)"""
+        """Login opcional usando Nodriver (CDP) - Wrapper síncrono"""
+        return asyncio.run(self.login_optional_async(username, password))
+
+    async def login_optional_async(self, username=None, password=None):
+        """Login opcional usando Nodriver (CDP) - Versão assíncrona"""
         if not username or not password:
             self.logger.info("Nenhuma credencial fornecida. Funcionando sem login.")
             return True
@@ -728,7 +732,7 @@ class InstagramScraper2025:
                 self.initialize_browser()
             
             # Tentar login
-            success = asyncio.run(self.browser_manager.login(username, password))
+            success = await self.browser_manager.login(username, password)
             
             if success:
                 self.logged_in = True
@@ -736,7 +740,7 @@ class InstagramScraper2025:
                 self.logger.info(f"Login Nodriver realizado com sucesso para {username}")
                 
                 # Sincronizar cookies do Nodriver para o curl_cffi session
-                asyncio.run(self._sync_cookies())
+                await self._sync_cookies()
                 return True
             else:
                 self.logger.error("Login Nodriver falhou")
@@ -833,13 +837,17 @@ class InstagramScraper2025:
 
     def get_user_posts(self, username, limit=20, ignore_pinned=False, media_type='both', start_date=None, end_date=None):
         """Obtém posts (Wrapper síncrono)"""
+        return asyncio.run(self.get_user_posts_async(username, limit, ignore_pinned, media_type, start_date, end_date))
+
+    async def get_user_posts_async(self, username, limit=20, ignore_pinned=False, media_type='both', start_date=None, end_date=None):
+        """Obtém posts (Versão assíncrona)"""
         # Primeiro precisamos do ID
-        user_info = self.get_user_info(username)
+        user_info = await self.get_profile_info_fast(username)
         if not user_info:
             return []
         
         user_id = user_info.get('id')
-        posts = asyncio.run(self.get_user_posts_fast(user_id, count=limit))
+        posts = await self.get_user_posts_fast(user_id, count=limit)
         
         # Filtragem básica (implementar filtros de data/pin se necessário)
         return posts if isinstance(posts, list) else posts[0]
@@ -897,11 +905,15 @@ class InstagramScraper2025:
 
     def get_following_list(self, username, limit=50):
         """Obtém lista de seguindo (Wrapper síncrono)"""
-        user_info = self.get_user_info(username)
+        return asyncio.run(self.get_following_list_async(username, limit))
+
+    async def get_following_list_async(self, username, limit=50):
+        """Obtém lista de seguindo (Versão assíncrona)"""
+        user_info = await self.get_profile_info_fast(username)
         if not user_info:
             return []
         user_id = user_info.get('id')
-        return asyncio.run(self.get_following_list_fast(user_id, count=limit))
+        return await self.get_following_list_fast(user_id, count=limit)
 
     async def get_following_list_fast(self, user_id, count=50):
         """Obtém lista de seguindo via API"""
@@ -954,14 +966,21 @@ class InstagramScraper2025:
             return None
 
     def cleanup(self):
-        """Limpa recursos"""
+        """Limpa recursos (Wrapper síncrono)"""
+        try:
+            asyncio.run(self.cleanup_async())
+        except Exception as e:
+            self.logger.error(f"Erro na limpeza: {e}")
+
+    async def cleanup_async(self):
+        """Limpa recursos (Versão assíncrona)"""
         try:
             if self.browser_manager:
-                asyncio.run(self.browser_manager.close())
+                await self.browser_manager.close()
             # Session do curl_cffi não precisa de close explícito se usada em context manager, mas aqui é persistente
             # self.session.close() # AsyncSession close é async
         except Exception as e:
-            self.logger.error(f"Erro na limpeza: {e}")
+            self.logger.error(f"Erro na limpeza assíncrona: {e}")
 
     def __enter__(self):
         return self
