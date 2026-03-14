@@ -11,6 +11,7 @@ import os
 import logging
 import requests
 from typing import Dict, List, Optional, Any
+from urllib.parse import urlparse
 from dataclasses import dataclass
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 import json
@@ -57,6 +58,11 @@ class OllamaClient:
         self.available_models: List[OllamaModel] = []
         self.model_name: Optional[str] = None
 
+        # Validar URL para evitar SSRF
+        if not self._is_valid_url(self.base_url):
+            logger.error(f"❌ URL do Ollama inválida ou insegura: {self.base_url}. Apenas localhost é permitido.")
+            return
+
         # Verificar se Ollama está disponível
         if self._check_connection():
             self.is_configured = True
@@ -74,6 +80,26 @@ class OllamaClient:
                 self.is_configured = False
         else:
             logger.warning(f"⚠️ Ollama não disponível em {self.base_url}. Funcionalidades de LLM local indisponíveis.")
+
+    def _is_valid_url(self, url: str) -> bool:
+        """
+        Valida se a URL é segura (apenas localhost/IP local).
+        Isso previne ataques de SSRF (Server-Side Request Forgery).
+        """
+        try:
+            parsed = urlparse(url)
+            if parsed.scheme not in ("http", "https"):
+                return False
+
+            hostname = parsed.hostname
+            if not hostname:
+                return False
+
+            # Permitir apenas localhost por padrão para segurança máxima
+            allowed_hosts = ("localhost", "127.0.0.1", "::1")
+            return hostname.lower() in allowed_hosts
+        except Exception:
+            return False
 
     def _check_connection(self) -> bool:
         """Verifica se o Ollama está acessível."""
