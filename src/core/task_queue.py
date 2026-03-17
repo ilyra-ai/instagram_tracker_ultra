@@ -18,11 +18,6 @@ from collections import deque
 import threading
 import json
 
-try:
-    from core.browser_manager import NodriverManager as BrowserManager
-except ImportError:
-    from browser_manager import NodriverManager as BrowserManager
-
 
 class TaskStatus(Enum):
     """Status possíveis de uma tarefa"""
