@@ -358,7 +358,7 @@ class GraphDatabase:
             """)
             
             nodes = []
-            for row in cursor.fetchall():
+            for row in cursor:
                 nodes.append(GraphNode(
                     id=row[0],
                     node_type=NodeType(row[1]),

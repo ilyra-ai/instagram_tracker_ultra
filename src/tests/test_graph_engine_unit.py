@@ -2,6 +2,67 @@ import unittest
 from unittest.mock import patch, MagicMock
 import sys
 import importlib
+import tempfile
+import os
+
+class TestGraphDatabase(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Mock dependencies missing in testing environment before importing
+        needed_mocks = [
+            'requests', 'cv2', 'ultralytics', 'PIL', 'vaderSentiment',
+            'statsmodels', 'scipy', 'numpy', 'matplotlib',
+            'python-louvain', 'community', 'aiohttp'
+        ]
+        for module in needed_mocks:
+            if module not in sys.modules:
+                sys.modules[module] = MagicMock()
+
+    @classmethod
+    def tearDownClass(cls):
+        # We can clean up, but it's not strictly necessary for this file.
+        pass
+
+    """
+    Test cases for GraphDatabase.
+    """
+    def setUp(self):
+        # Import inside setUp to ensure mocks are active
+        from intelligence.graph_engine import GraphDatabase, GraphNode, NodeType
+        self.GraphNode = GraphNode
+        self.NodeType = NodeType
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.db_path = os.path.join(self.temp_dir.name, "test_graphs.db")
+        self.db = GraphDatabase(db_path=self.db_path)
+
+    def tearDown(self):
+        self.temp_dir.cleanup()
+
+    def test_get_all_nodes(self):
+        """Test that get_all_nodes correctly retrieves all saved nodes."""
+        node1 = self.GraphNode(
+            id="user1",
+            node_type=self.NodeType.USER,
+            label="user1",
+            data={'is_central': True}
+        )
+        node2 = self.GraphNode(
+            id="user2",
+            node_type=self.NodeType.USER,
+            label="user2",
+            data={'is_central': False}
+        )
+
+        self.db.save_node(node1)
+        self.db.save_node(node2)
+
+        nodes = self.db.get_all_nodes()
+        self.assertEqual(len(nodes), 2)
+
+        node_ids = {n.id for n in nodes}
+        self.assertIn("user1", node_ids)
+        self.assertIn("user2", node_ids)
+
 
 class TestGraphEngineImports(unittest.TestCase):
     """
