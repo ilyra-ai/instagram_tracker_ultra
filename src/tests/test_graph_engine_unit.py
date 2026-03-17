@@ -68,5 +68,51 @@ class TestGraphEngineImports(unittest.TestCase):
             self.assertTrue(graph_engine.NETWORKX_AVAILABLE)
             self.assertIsNotNone(graph_engine.nx)
 
+class TestGraphDatabase(unittest.TestCase):
+    """
+    Test cases for GraphDatabase exceptions.
+    """
+
+    def setUp(self):
+        # Mock modules just like TestGraphEngineImports does
+        self._orig_modules = sys.modules.copy()
+        self.needed_mocks = [
+            'requests', 'cv2', 'ultralytics', 'PIL', 'vaderSentiment',
+            'statsmodels', 'scipy', 'numpy', 'matplotlib',
+            'python-louvain', 'community', 'aiohttp', 'nodriver'
+        ]
+
+        for module in self.needed_mocks:
+            if module not in sys.modules:
+                sys.modules[module] = MagicMock()
+
+    def tearDown(self):
+        for module in self.needed_mocks:
+            if module in sys.modules and sys.modules[module] != self._orig_modules.get(module):
+                if module in self._orig_modules:
+                    sys.modules[module] = self._orig_modules[module]
+                else:
+                    del sys.modules[module]
+
+    def test_get_all_nodes_exception(self):
+        """Test that get_all_nodes handles exceptions correctly and returns an empty list."""
+        from intelligence.graph_engine import GraphDatabase
+
+        # Instantiate without the mock so that __init__ and _init_db execute correctly
+        db = GraphDatabase(":memory:")
+
+        with patch('sqlite3.connect') as mock_connect:
+            mock_conn = MagicMock()
+            mock_cursor = MagicMock()
+            mock_cursor.execute.side_effect = Exception("Simulated database cursor error")
+            mock_conn.cursor.return_value = mock_cursor
+            mock_connect.return_value = mock_conn
+
+            with patch('intelligence.graph_engine.logger.error') as mock_logger:
+                result = db.get_all_nodes()
+                self.assertEqual(result, [])
+                mock_logger.assert_called_once_with("Erro ao obter nós: Simulated database cursor error")
+
+
 if __name__ == '__main__':
     unittest.main()
