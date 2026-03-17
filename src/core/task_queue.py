@@ -9,7 +9,6 @@ Versão: 1.0.0
 import asyncio
 import logging
 import uuid
-import time
 from datetime import datetime
 from typing import Optional, Dict, Any, Callable, List, Awaitable
 from dataclasses import dataclass, field
