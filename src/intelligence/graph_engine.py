@@ -357,9 +357,8 @@ class GraphDatabase:
                 FROM nodes
             """)
             
-            nodes = []
-            for row in cursor.fetchall():
-                nodes.append(GraphNode(
+            nodes = [
+                GraphNode(
                     id=row[0],
                     node_type=NodeType(row[1]),
                     label=row[2],
@@ -375,7 +374,9 @@ class GraphDatabase:
                     x=row[12],
                     y=row[13],
                     z=row[14]
-                ))
+                )
+                for row in cursor
+            ]
             
             conn.close()
             return nodes
@@ -395,9 +396,8 @@ class GraphDatabase:
                 FROM edges
             """)
             
-            edges = []
-            for row in cursor.fetchall():
-                edges.append(GraphEdge(
+            edges = [
+                GraphEdge(
                     source=row[0],
                     target=row[1],
                     edge_type=EdgeType(row[2]),
@@ -405,7 +405,9 @@ class GraphDatabase:
                     data=json.loads(row[4]) if row[4] else {},
                     color=row[5] or "#999999",
                     width=row[6] or 1
-                ))
+                )
+                for row in cursor
+            ]
             
             conn.close()
             return edges
