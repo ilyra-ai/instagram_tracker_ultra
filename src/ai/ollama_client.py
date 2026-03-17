@@ -60,8 +60,9 @@ class OllamaClient:
 
         # Validar URL para evitar SSRF
         if not self._is_valid_url(self.base_url):
-            logger.error(f"❌ URL do Ollama inválida ou insegura: {self.base_url}. Apenas localhost é permitido.")
-            return
+            error_msg = f"URL do Ollama inválida ou insegura: {self.base_url}. Apenas localhost é permitido."
+            logger.error(f"❌ {error_msg}")
+            raise ValueError(error_msg)
 
         # Verificar se Ollama está disponível
         if self._check_connection():
