@@ -147,7 +147,6 @@ class SessionManager:
     """
     
     DEFAULT_SESSION_DIR = ".instagram_sessions"
-    DEFAULT_PASSWORD = "instagram_tracker_2025_secure_key"
     
     def __init__(self, session_dir: Optional[str] = None, password: Optional[str] = None):
         """
@@ -155,10 +154,14 @@ class SessionManager:
         
         Args:
             session_dir: Diretório para armazenar sessões
-            password: Senha para criptografia
+            password: Senha para criptografia. Se não fornecido, usa a variável de ambiente SESSION_ENCRYPTION_KEY.
         """
         self.session_dir = session_dir or self.DEFAULT_SESSION_DIR
-        self.password = password or self.DEFAULT_PASSWORD
+
+        self.password = password or os.environ.get("SESSION_ENCRYPTION_KEY")
+        if not self.password:
+            raise ValueError("SESSION_ENCRYPTION_KEY environment variable is missing and no password was provided.")
+
         self.logger = logging.getLogger("SessionManager")
         
         # Criar diretório se não existir
