@@ -68,5 +68,74 @@ class TestGraphEngineImports(unittest.TestCase):
             self.assertTrue(graph_engine.NETWORKX_AVAILABLE)
             self.assertIsNotNone(graph_engine.nx)
 
+class TestGraphDatabase(unittest.TestCase):
+    """
+    Test cases for GraphDatabase methods.
+    """
+
+    def setUp(self):
+        # Save original sys.modules to restore after tests
+        self._orig_modules = sys.modules.copy()
+
+        self.needed_mocks = [
+            'requests', 'cv2', 'ultralytics', 'PIL', 'vaderSentiment',
+            'statsmodels', 'scipy', 'numpy', 'matplotlib',
+            'python-louvain', 'community', 'aiohttp'
+        ]
+
+        for module in self.needed_mocks:
+            if module not in sys.modules:
+                sys.modules[module] = MagicMock()
+
+    def tearDown(self):
+        # Restore original sys.modules
+        for module in self.needed_mocks:
+            if module in sys.modules and sys.modules[module] != self._orig_modules.get(module):
+                if module in self._orig_modules:
+                    sys.modules[module] = self._orig_modules[module]
+                else:
+                    del sys.modules[module]
+
+    @patch('sqlite3.connect')
+    def test_save_node_error(self, mock_connect):
+        """Test that save_node returns False when an exception occurs."""
+        from intelligence.graph_engine import GraphDatabase, GraphNode, NodeType
+
+        # Make the connection throw an exception to test the except block
+        mock_connect.side_effect = Exception("Mock DB error")
+
+        # Disable _init_db to prevent creating the table during initialization
+        with patch.object(GraphDatabase, '_init_db'):
+            db = GraphDatabase(db_path=":memory:")
+
+        node = GraphNode(
+            id="test_node",
+            node_type=NodeType.USER,
+            label="Test Node",
+            data={}
+        )
+
+        result = db.save_node(node)
+        self.assertFalse(result)
+
+    @patch('sqlite3.connect')
+    def test_save_edge_error(self, mock_connect):
+        """Test that save_edge returns False when an exception occurs."""
+        from intelligence.graph_engine import GraphDatabase, GraphEdge, EdgeType
+
+        mock_connect.side_effect = Exception("Mock DB error")
+
+        with patch.object(GraphDatabase, '_init_db'):
+            db = GraphDatabase(db_path=":memory:")
+
+        edge = GraphEdge(
+            source="user1",
+            target="user2",
+            edge_type=EdgeType.FOLLOWS
+        )
+
+        result = db.save_edge(edge)
+        self.assertFalse(result)
+
 if __name__ == '__main__':
     unittest.main()
