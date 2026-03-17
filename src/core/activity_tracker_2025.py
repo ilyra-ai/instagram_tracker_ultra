@@ -25,9 +25,9 @@ except ImportError:
 # Tentar importar cache manager
 try:
     try:
-        from core.cache_manager import cached, with_backoff_jitter, get_cache_manager
+        from core.cache_manager import cached, with_backoff_jitter
     except ImportError:
-        from cache_manager import cached, with_backoff_jitter, get_cache_manager
+        from cache_manager import cached, with_backoff_jitter
     CACHE_AVAILABLE = True
 except ImportError:
     CACHE_AVAILABLE = False
@@ -39,8 +39,6 @@ except ImportError:
         def decorator(func):
             return func
         return decorator
-    def get_cache_manager():
-        return None
 
 
 class LikersCache:
