@@ -9,7 +9,6 @@ Idioma: Português Brasileiro (pt-BR)
 
 import os
 import logging
-import hashlib
 import requests
 import socket
 import ipaddress
