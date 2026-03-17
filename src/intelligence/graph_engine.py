@@ -304,6 +304,77 @@ class GraphDatabase:
         except Exception as e:
             logger.error(f"Erro ao salvar aresta: {e}")
             return False
+
+
+    def save_nodes(self, nodes: List[GraphNode]) -> bool:
+        """Salva ou atualiza múltiplos nós em lote"""
+        if not nodes:
+            return True
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+
+                cursor.executemany("""
+                    INSERT INTO nodes
+                        (id, node_type, label, data, degree_centrality, betweenness_centrality,
+                         closeness_centrality, pagerank, community_id, role, color, size, x, y, z)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(id) DO UPDATE SET
+                        label = excluded.label,
+                        data = excluded.data,
+                        degree_centrality = excluded.degree_centrality,
+                        betweenness_centrality = excluded.betweenness_centrality,
+                        closeness_centrality = excluded.closeness_centrality,
+                        pagerank = excluded.pagerank,
+                        community_id = excluded.community_id,
+                        role = excluded.role,
+                        color = excluded.color,
+                        size = excluded.size,
+                        x = excluded.x,
+                        y = excluded.y,
+                        z = excluded.z,
+                        updated_at = CURRENT_TIMESTAMP
+                """, [
+                    (node.id, node.node_type.value, node.label, json.dumps(node.data),
+                     node.degree_centrality, node.betweenness_centrality,
+                     node.closeness_centrality, node.pagerank, node.community_id,
+                     node.role.value, node.color, node.size, node.x, node.y, node.z)
+                    for node in nodes
+                ])
+            return True
+
+        except Exception as e:
+            logger.error(f"Erro ao salvar nós em lote: {e}")
+            return False
+
+
+    def save_edges(self, edges: List[GraphEdge]) -> bool:
+        """Salva ou atualiza múltiplas arestas em lote"""
+        if not edges:
+            return True
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+
+                cursor.executemany("""
+                    INSERT INTO edges
+                        (source, target, edge_type, weight, data, color, width)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(source, target, edge_type) DO UPDATE SET
+                        weight = excluded.weight,
+                        data = excluded.data,
+                        color = excluded.color,
+                        width = excluded.width
+                """, [
+                    (edge.source, edge.target, edge.edge_type.value,
+                     edge.weight, json.dumps(edge.data), edge.color, edge.width)
+                    for edge in edges
+                ])
+            return True
+
+        except Exception as e:
+            logger.error(f"Erro ao salvar arestas em lote: {e}")
+            return False
     
     def get_node(self, node_id: str) -> Optional[GraphNode]:
         """Obtém um nó pelo ID"""
@@ -668,11 +739,8 @@ class SocialGraphAnalyzer:
     
     def _save_to_database(self):
         """Salva grafo atual no banco de dados"""
-        for node in self.nodes.values():
-            self.database.save_node(node)
-        
-        for edge in self.edges:
-            self.database.save_edge(edge)
+        self.database.save_nodes(list(self.nodes.values()))
+        self.database.save_edges(self.edges)
     
     def _build_networkx_graph(self) -> Any:
         """Constrói grafo NetworkX a partir dos dados internos"""
