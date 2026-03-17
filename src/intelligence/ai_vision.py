@@ -45,11 +45,10 @@ except ImportError:
 
 # Ultralytics YOLO (opcional, para quem tem instalado)
 try:
-    from ultralytics import YOLO
+    import ultralytics
     ULTRALYTICS_AVAILABLE = True
 except ImportError:
     ULTRALYTICS_AVAILABLE = False
-    YOLO = None
 
 logger = logging.getLogger(__name__)
 
