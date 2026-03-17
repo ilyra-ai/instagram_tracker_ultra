@@ -323,86 +323,93 @@ class ActivityTracker2025:
             max_posts: Número máximo de posts a verificar
         """
         try:
-            # Obter posts recentes do perfil
+            # Obter posts recentes do perfil de forma assincrona e nao bloqueante
             posts = await self.scraper.get_user_posts_async(profile_username, limit=max_posts)
             
             if not isinstance(posts, list) or not posts:
                 self.logger.debug(f"   └── Nenhum post encontrado para @{profile_username}")
                 return
             
-            for post in posts:
-                self.stats['posts_scanned'] += 1
-                
-                post_url = post.get('url', '')
-                shortcode = post.get('code', '')
-                post_caption = post.get('caption', '')
-                post_timestamp = post.get('timestamp')
-                thumbnail_url = post.get('thumbnail_url')
-                
-                if not shortcode:
-                    continue
-                
-                # 1. Verificar se o alvo CURTIU este post
-                has_liked = await self._check_if_user_liked_post(shortcode, target_username)
-                
-                if has_liked:
-                    self.stats['likes_found'] += 1
-                    self.activities.append({
-                        'type': 'outgoing_like',
-                        'target_user': profile_username,
-                        'post_url': post_url,
-                        'post_code': shortcode,
-                        'post_caption': post_caption[:200] if post_caption else None,
-                        'post_timestamp': post_timestamp,
-                        'thumbnail_url': thumbnail_url,
-                        'detected_at': datetime.now().isoformat(),
-                        'confidence': 'high'
-                    })
-                    self.logger.info(f"   ❤️ LIKE ENCONTRADO! @{target_username} curtiu post de @{profile_username}")
-                
-                # 2. Verificar se o alvo COMENTOU neste post
-                comment_data = await self._check_if_user_commented_post(shortcode, target_username)
-                
-                if comment_data:
-                    self.stats['comments_found'] += 1
-                    comment_id = comment_data.get('id')
-                    comment_url = f"https://www.instagram.com/p/{shortcode}/c/{comment_id}/" if comment_id else post_url
+            # Limite de concorrência
+            semaphore = asyncio.Semaphore(5)
+
+            async def _process_post(post):
+                async with semaphore:
+                    self.stats['posts_scanned'] += 1
                     
-                    self.activities.append({
-                        'type': 'outgoing_comment',
-                        'target_user': profile_username,
-                        'post_url': post_url,
-                        'post_code': shortcode,
-                        'comment_id': comment_id,
-                        'comment_url': comment_url,
-                        'comment_text': comment_data.get('text', ''),
-                        'comment_timestamp': comment_data.get('created_at'),
-                        'post_caption': post_caption[:200] if post_caption else None,
-                        'post_timestamp': post_timestamp,
-                        'thumbnail_url': thumbnail_url,
-                        'detected_at': datetime.now().isoformat(),
-                        'confidence': 'high'
-                    })
-                    self.logger.info(f"   💬 COMENTÁRIO ENCONTRADO! @{target_username} comentou em @{profile_username}")
-                
-                # 3. Verificar se o alvo foi MENCIONADO no post
-                if post_caption:
-                    mentions = self._extract_mentions(post_caption)
-                    if target_username.lower() in [m.lower() for m in mentions]:
-                        self.stats['mentions_found'] += 1
+                    post_url = post.get('url', '')
+                    shortcode = post.get('code', '')
+                    post_caption = post.get('caption', '')
+                    post_timestamp = post.get('timestamp')
+                    thumbnail_url = post.get('thumbnail_url')
+
+                    if not shortcode:
+                        return
+
+                    # 1. Verificar se o alvo CURTIU ou COMENTOU este post simultaneamente
+                    like_task = asyncio.create_task(self._check_if_user_liked_post(shortcode, target_username))
+                    comment_task = asyncio.create_task(self._check_if_user_commented_post(shortcode, target_username))
+
+                    has_liked, comment_data = await asyncio.gather(like_task, comment_task)
+
+                    if has_liked:
+                        self.stats['likes_found'] += 1
                         self.activities.append({
-                            'type': 'mention_received',
-                            'from_user': profile_username,
+                            'type': 'outgoing_like',
+                            'target_user': profile_username,
                             'post_url': post_url,
                             'post_code': shortcode,
-                            'post_caption': post_caption[:200],
+                            'post_caption': post_caption[:200] if post_caption else None,
                             'post_timestamp': post_timestamp,
                             'thumbnail_url': thumbnail_url,
                             'detected_at': datetime.now().isoformat(),
                             'confidence': 'high'
                         })
-                        self.logger.info(f"   📣 MENÇÃO ENCONTRADA! @{profile_username} mencionou @{target_username}")
-                
+                        self.logger.info(f"   ❤️ LIKE ENCONTRADO! @{target_username} curtiu post de @{profile_username}")
+
+                    if comment_data:
+                        self.stats['comments_found'] += 1
+                        comment_id = comment_data.get('id')
+                        comment_url = f"https://www.instagram.com/p/{shortcode}/c/{comment_id}/" if comment_id else post_url
+
+                        self.activities.append({
+                            'type': 'outgoing_comment',
+                            'target_user': profile_username,
+                            'post_url': post_url,
+                            'post_code': shortcode,
+                            'comment_id': comment_id,
+                            'comment_url': comment_url,
+                            'comment_text': comment_data.get('text', ''),
+                            'comment_timestamp': comment_data.get('created_at'),
+                            'post_caption': post_caption[:200] if post_caption else None,
+                            'post_timestamp': post_timestamp,
+                            'thumbnail_url': thumbnail_url,
+                            'detected_at': datetime.now().isoformat(),
+                            'confidence': 'high'
+                        })
+                        self.logger.info(f"   💬 COMENTÁRIO ENCONTRADO! @{target_username} comentou em @{profile_username}")
+
+                    # 3. Verificar se o alvo foi MENCIONADO no post
+                    if post_caption:
+                        mentions = self._extract_mentions(post_caption)
+                        if target_username.lower() in [m.lower() for m in mentions]:
+                            self.stats['mentions_found'] += 1
+                            self.activities.append({
+                                'type': 'mention_received',
+                                'from_user': profile_username,
+                                'post_url': post_url,
+                                'post_code': shortcode,
+                                'post_caption': post_caption[:200],
+                                'post_timestamp': post_timestamp,
+                                'thumbnail_url': thumbnail_url,
+                                'detected_at': datetime.now().isoformat(),
+                                'confidence': 'high'
+                            })
+                            self.logger.info(f"   📣 MENÇÃO ENCONTRADA! @{profile_username} mencionou @{target_username}")
+
+            # Processar posts de forma simultânea, limitando com semaphore para evitar overload
+            await asyncio.gather(*[_process_post(post) for post in posts])
+
         except Exception as e:
             self.stats['errors'] += 1
             self.logger.error(f"   └── Erro ao varrer @{profile_username}: {e}")
