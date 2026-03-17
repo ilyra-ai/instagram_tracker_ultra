@@ -56,11 +56,11 @@ except ImportError:
 
 # Importar Task Queue
 try:
-    from core.task_queue import get_task_queue, TaskPriority, TaskStatus
+    from core.task_queue import get_task_queue, TaskPriority
     TASK_QUEUE_AVAILABLE = True
 except ImportError:
     try:
-        from task_queue import get_task_queue, TaskPriority, TaskStatus
+        from task_queue import get_task_queue, TaskPriority
         TASK_QUEUE_AVAILABLE = True
     except ImportError:
         TASK_QUEUE_AVAILABLE = False
