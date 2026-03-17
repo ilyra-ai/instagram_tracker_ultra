@@ -23,17 +23,12 @@ except ImportError:
 # Import cache manager para decorators
 try:
     try:
-        from core.cache_manager import cached
+        import core.cache_manager  # noqa: F401
     except ImportError:
-        from cache_manager import cached
+        import cache_manager  # noqa: F401
     CACHE_AVAILABLE = True
 except ImportError:
     CACHE_AVAILABLE = False
-    # Fallback: decorators que não fazem nada
-    def cached(ttl=600, key_prefix=""):
-        def decorator(func):
-            return func
-        return decorator
 
 
 class TLSFingerprintRotator:
