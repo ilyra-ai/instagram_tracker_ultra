@@ -942,6 +942,10 @@ class ProxyManager:
             self.report_failure(proxy, "Timeout")
             return False
         except Exception as e:
+            import socket
+            if isinstance(e, (socket.herror, socket.gaierror, socket.timeout)):
+                self.report_failure(proxy, "Network error")
+                return False
             self.report_failure(proxy, str(e))
             return False
     
