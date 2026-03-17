@@ -11,6 +11,9 @@ import os
 import logging
 import hashlib
 import requests
+import socket
+import ipaddress
+from urllib.parse import urlparse
 from io import BytesIO
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
@@ -430,13 +433,70 @@ class AIVision:
         
         return objetos[:20]  # Limitar a 20 objetos
     
+    def _is_safe_url(self, url: str) -> bool:
+        """Valida se a URL é segura (previne SSRF)."""
+        try:
+            parsed = urlparse(url)
+            if parsed.scheme not in ("http", "https"):
+                return False
+
+            hostname = parsed.hostname
+            if not hostname:
+                return False
+
+            # Resolve hostname to IP (support IPv4 and IPv6)
+            try:
+                addr_info = socket.getaddrinfo(hostname, None)
+            except socket.gaierror:
+                return False
+
+            # Check all resolved IPs to ensure they are safe
+            for info in addr_info:
+                ip = info[4][0]
+                ip_obj = ipaddress.ip_address(ip)
+                if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local or ip_obj.is_multicast:
+                    return False
+
+            return True
+        except Exception:
+            return False
+
     def _download_image(self, url: str) -> Optional['Image.Image']:
         """Baixa imagem de URL"""
+        if not self._is_safe_url(url):
+            self.logger.error(f"❌ URL insegura rejeitada: {url}")
+            return None
+
         try:
             headers = {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0'
             }
-            response = requests.get(url, headers=headers, timeout=30)
+
+            # Segue redirecionamentos manualmente para verificar cada nova URL
+            session = requests.Session()
+            current_url = url
+
+            for _ in range(5): # Máximo de 5 redirecionamentos
+                response = session.get(current_url, headers=headers, timeout=30, allow_redirects=False)
+
+                if response.status_code in (301, 302, 303, 307, 308):
+                    next_url = response.headers.get('Location')
+                    if not next_url:
+                        break
+
+                    # Tratar URLs relativas
+                    if not next_url.startswith(('http://', 'https://')):
+                        from urllib.parse import urljoin
+                        next_url = urljoin(current_url, next_url)
+
+                    if not self._is_safe_url(next_url):
+                        self.logger.error(f"❌ Redirecionamento inseguro rejeitado: {next_url}")
+                        return None
+
+                    current_url = next_url
+                else:
+                    break
+
             response.raise_for_status()
             
             image = Image.open(BytesIO(response.content))
