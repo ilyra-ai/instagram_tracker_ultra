@@ -24,7 +24,7 @@ USO:
     )
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, Any, Optional
 from enum import Enum
 import logging
