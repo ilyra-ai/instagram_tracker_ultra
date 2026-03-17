@@ -1106,7 +1106,7 @@ class CDPEvasion:
             // 9. IFRAME CONTENTWINDOW
             // =================================================================
             
-            // Fix para iframes headless
+            // Workaround para iframes em modo headless
             try {
                 const elementDescriptor = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'contentWindow');
                 Object.defineProperty(HTMLIFrameElement.prototype, 'contentWindow', {
