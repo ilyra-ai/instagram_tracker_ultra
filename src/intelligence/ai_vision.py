@@ -9,7 +9,6 @@ Idioma: Português Brasileiro (pt-BR)
 
 import os
 import logging
-import hashlib
 import requests
 from io import BytesIO
 from pathlib import Path
