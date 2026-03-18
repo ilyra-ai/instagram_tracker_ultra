@@ -20,7 +20,7 @@ import hashlib
 import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Tuple, Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 import aiohttp
