@@ -1,787 +1,189 @@
-<!doctype html>
-<html lang="pt-br">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Instagram Intelligence System 2026</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/style.css') }}"
-    />
-  </head>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Comando Estelar - Lyra Tracker</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-[#F8F7FC] min-h-screen text-gray-900 font-sans antialiased overflow-x-hidden">
 
-  <body class="premium-theme">
-    <div class="app-container">
-      <!-- Sidebar -->
-      <aside class="sidebar" id="sidebar">
-        <div class="sidebar__header">
-          <a href="/" class="sidebar__logo">
-            <i class="fab fa-instagram"></i>
-            <span class="sidebar__text">Intelligence 2026</span>
-          </a>
-          <button class="sidebar__toggle" title="Recolher/Expandir">
-            <i class="fas fa-bars"></i>
-          </button>
+    <!-- Navbar / Header -->
+    <header class="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 z-40 flex items-center justify-between px-6 transition-all duration-300 md:ml-64">
+        <div class="flex items-center gap-4">
+            <button id="mobile-menu-btn" class="p-2 -ml-2 rounded-lg text-gray-500 hover:bg-gray-100 md:hidden transition-colors">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
+            <h1 class="text-xl font-bold display-font hidden sm:block">Dashboard</h1>
         </div>
 
-        <nav class="sidebar__nav">
-          <!-- Seção Principal -->
-          <div class="sidebar__section">
-            <span class="sidebar__section-title">Principal</span>
-            <ul class="sidebar__menu">
-              <li class="sidebar__item">
-                <a
-                  href="#dashboard"
-                  class="sidebar__link active"
-                  data-tab="dashboard"
-                >
-                  <i class="fas fa-home"></i>
-                  <span class="sidebar__text">Visão Geral</span>
-                </a>
-              </li>
-              <li class="sidebar__item">
-                <a href="#tracking" class="sidebar__link" data-tab="tracking">
-                  <i class="fas fa-search"></i>
-                  <span class="sidebar__text">Rastreamento</span>
-                </a>
-              </li>
-              <li class="sidebar__item">
-                <a href="#activities" class="sidebar__link" data-tab="activities">
-                  <i class="fas fa-heart"></i>
-                  <span class="sidebar__text">Atividades</span>
-                  <span
-                    class="sidebar__badge"
-                    id="activities-badge"
-                    style="display: none"
-                    >0</span
-                  >
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <!-- Seção Inteligência -->
-          <div class="sidebar__section">
-            <span class="sidebar__section-title">Inteligência IA</span>
-            <ul class="sidebar__menu">
-              <li class="sidebar__item">
-                <a href="#sentiment" class="sidebar__link" data-tab="sentiment">
-                  <i class="fas fa-smile"></i>
-                  <span class="sidebar__text">Sentimento</span>
-                </a>
-              </li>
-              <li class="sidebar__item">
-                <a href="#predictive" class="sidebar__link" data-tab="predictive">
-                  <i class="fas fa-chart-line"></i>
-                  <span class="sidebar__text">Preditivo</span>
-                </a>
-              </li>
-              <li class="sidebar__item">
-                <a href="#vision" class="sidebar__link" data-tab="vision">
-                  <i class="fas fa-eye"></i>
-                  <span class="sidebar__text">Visão IA</span>
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <!-- Seção Rede -->
-          <div class="sidebar__section">
-            <span class="sidebar__section-title">Análise de Rede</span>
-            <ul class="sidebar__menu">
-              <li class="sidebar__item">
-                <a href="#network" class="sidebar__link" data-tab="network">
-                  <i class="fas fa-project-diagram"></i>
-                  <span class="sidebar__text">Grafo de Rede</span>
-                </a>
-              </li>
-              <li class="sidebar__item">
-                <a href="#locations" class="sidebar__link" data-tab="locations">
-                  <i class="fas fa-map-marker-alt"></i>
-                  <span class="sidebar__text">Localizações</span>
-                </a>
-              </li>
-              <li class="sidebar__item">
-                <a
-                  href="#top-interactions"
-                  class="sidebar__link"
-                  data-tab="top-interactions"
-                >
-                  <i class="fas fa-users"></i>
-                  <span class="sidebar__text">Top Interações</span>
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <!-- Seção OSINT -->
-          <div class="sidebar__section">
-            <span class="sidebar__section-title">OSINT</span>
-            <ul class="sidebar__menu">
-              <li class="sidebar__item">
-                <a href="#osint" class="sidebar__link" data-tab="osint">
-                  <i class="fas fa-search-plus"></i>
-                  <span class="sidebar__text">Cross-Platform</span>
-                </a>
-              </li>
-              <li class="sidebar__item">
-                <a href="#breach" class="sidebar__link" data-tab="breach">
-                  <i class="fas fa-shield-alt"></i>
-                  <span class="sidebar__text">Breach Check</span>
-                  <span
-                    class="sidebar__badge"
-                    id="breach-badge"
-                    style="display: none"
-                    >0</span
-                  >
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <!-- Seção Ferramentas -->
-          <div class="sidebar__section">
-            <span class="sidebar__section-title">Ferramentas</span>
-            <ul class="sidebar__menu">
-              <li class="sidebar__item">
-                <a href="#chat" class="sidebar__link" data-tab="chat">
-                  <i class="fas fa-comments"></i>
-                  <span class="sidebar__text">Chat / Notas</span>
-                  <span
-                    class="sidebar__badge"
-                    id="chat-badge"
-                    style="display: none"
-                    >0</span
-                  >
-                </a>
-              </li>
-              <li class="sidebar__item">
-                <a
-                  href="#ai-settings"
-                  class="sidebar__link"
-                  data-tab="ai-settings"
-                >
-                  <i class="fas fa-robot"></i>
-                  <span class="sidebar__text">Config. IA</span>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </nav>
-
-        <div class="sidebar__footer">
-          <div class="sidebar__user">
-            <div class="sidebar__avatar">
-              <i class="fas fa-user"></i>
+        <div class="flex items-center gap-4">
+            <div class="relative hidden md:block">
+                <i data-lucide="search" class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" placeholder="Buscar em tudo..." class="pl-10 pr-4 py-2 bg-gray-50 border-none rounded-full w-64 focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all text-sm outline-none">
             </div>
-            <div class="sidebar__text">
-              <div style="font-weight: 600">Sistema</div>
-              <div style="font-size: 0.8rem; color: #666">v2026.1.0</div>
-            </div>
-          </div>
+
+            <button class="relative p-2 rounded-full text-gray-500 hover:bg-teal-50 hover:text-teal-600 transition-colors">
+                <i data-lucide="bell" class="w-6 h-6"></i>
+                <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-coral-500 rounded-full animate-pulse"></span>
+            </button>
+
+            <div class="h-8 w-px bg-gray-200 hidden sm:block"></div>
+
+            <button class="flex items-center gap-2 group p-1 pr-3 rounded-full hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100">
+                <img src="https://ui-avatars.com/api/?name=Admin+Lyra&background=e0f2f1&color=00897b" alt="Avatar" class="w-8 h-8 rounded-full shadow-sm">
+                <span class="text-sm font-semibold hidden sm:block">Admin Lyra</span>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors"></i>
+            </button>
         </div>
-      </aside>
+    </header>
 
-      <!-- Overlay para mobile -->
-      <div class="sidebar-overlay"></div>
+    {% include 'sidebar_fixed.html' %}
 
-      <!-- Main Content -->
-      <main class="main-content">
-        <header class="top-bar">
-          <div class="top-bar__search">
-            <i class="fas fa-search"></i>
-            <input
-              type="text"
-              id="global-search"
-              placeholder="Buscar em toda a inteligência..."
-            />
-          </div>
-          <div class="top-bar__actions">
-            <button class="action-btn" title="Notificações">
-              <i class="fas fa-bell"></i>
-              <span class="badge">3</span>
-            </button>
-            <button class="action-btn" title="Configurações">
-              <i class="fas fa-cog"></i>
-            </button>
-          </div>
-        </header>
+    <!-- Main Content Bento Grid -->
+    <main class="pt-24 pb-12 px-4 md:px-8 max-w-7xl mx-auto md:ml-64 transition-all duration-300">
+        
+        <div class="mb-8 animate-fade-in-up">
+            <h2 class="text-3xl font-bold display-font mb-2">Bem-vindo(a) de volta, Admin! ✨</h2>
+            <p class="text-gray-500 text-lg">Aqui está o panorama da sua jornada de longevidade cósmica hoje.</p>
+        </div>
 
-        <div class="content-wrapper">
-          <div id="dashboard-content" class="tab-content">
-            <!-- ========================================= -->
-            <!-- TAB: DASHBOARD (Visão Geral) -->
-            <!-- ========================================= -->
-            <div id="tab-dashboard" class="tab-pane active">
-              <div class="dashboard-grid">
-                <!-- Profile Card -->
-                <div class="grid-col-4">
-                  <div id="profile-card-container">
-                    <div class="widget profile-placeholder">
-                      <div class="placeholder-avatar"></div>
-                      <div class="placeholder-lines">
-                        <div class="line"></div>
-                        <div class="line short"></div>
-                      </div>
+        <!-- Bento Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in" style="animation-delay: 0.1s;">
+            
+            <!-- Vitais Resumo (Span 2) -->
+            <div class="glass-card md:col-span-2 p-6 flex flex-col justify-between relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <i data-lucide="heart-pulse" class="w-32 h-32 text-teal-600"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-2.5 bg-teal-100 text-teal-600 rounded-xl">
+                            <i data-lucide="activity" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-xl text-gray-800 display-font">Métricas Vitais</h3>
                     </div>
-                  </div>
+                    <p class="text-gray-500 mb-6 text-sm">Resumo da sua saúde nas últimas 24 horas.</p>
                 </div>
 
-                <!-- Stats Overview -->
-                <div class="grid-col-8">
-                  <div class="stats-row">
-                    <div class="stat-card">
-                      <div class="stat-icon"><i class="fas fa-heart"></i></div>
-                      <div class="stat-info">
-                        <span class="stat-label">Total Likes</span>
-                        <span class="stat-value" id="stat-likes">0</span>
-                      </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                        <div class="text-gray-400 mb-1 flex items-center justify-between">
+                            <span class="text-xs font-semibold uppercase tracking-wide">BPM</span>
+                            <i data-lucide="heart" class="w-4 h-4 text-rose-400"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-gray-800">72 <span class="text-sm font-normal text-gray-500">bpm</span></div>
                     </div>
-                    <div class="stat-card">
-                      <div class="stat-icon">
-                        <i class="fas fa-comment"></i>
-                      </div>
-                      <div class="stat-info">
-                        <span class="stat-label">Comentários</span>
-                        <span class="stat-value" id="stat-comments">0</span>
-                      </div>
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                        <div class="text-gray-400 mb-1 flex items-center justify-between">
+                            <span class="text-xs font-semibold uppercase tracking-wide">Sono</span>
+                            <i data-lucide="moon" class="w-4 h-4 text-indigo-400"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-gray-800">7h 15m</div>
                     </div>
-                    <div class="stat-card">
-                      <div class="stat-icon"><i class="fas fa-at"></i></div>
-                      <div class="stat-info">
-                        <span class="stat-label">Menções</span>
-                        <span class="stat-value" id="stat-mentions">0</span>
-                      </div>
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                        <div class="text-gray-400 mb-1 flex items-center justify-between">
+                            <span class="text-xs font-semibold uppercase tracking-wide">Passos</span>
+                            <i data-lucide="footprints" class="w-4 h-4 text-teal-400"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-gray-800">8.432</div>
                     </div>
-                  </div>
-
-                  <div class="widget engagement-widget">
-                    <div class="widget__header">
-                      <h3 class="widget__title">
-                        <i class="fas fa-chart-area"></i> Velocidade de
-                        Interação
-                      </h3>
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                        <div class="text-gray-400 mb-1 flex items-center justify-between">
+                            <span class="text-xs font-semibold uppercase tracking-wide">VFC</span>
+                            <i data-lucide="waves" class="w-4 h-4 text-blue-400"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-gray-800">55 <span class="text-sm font-normal text-gray-500">ms</span></div>
                     </div>
-                    <div
-                      id="engagement-chart-container"
-                      class="chart-container"
-                    >
-                      <p
-                        style="
-                          color: #666;
-                          text-align: center;
-                          padding-top: 50px;
-                        "
-                      >
-                        Aguardando dados de rastreamento...
-                      </p>
-                    </div>
-                  </div>
                 </div>
-
-                <!-- Secondary Row -->
-                <div class="grid-col-4">
-                  <div class="widget">
-                    <div class="widget__header">
-                      <h3 class="widget__title">
-                        <i class="fas fa-history"></i> Atividades Recentes
-                      </h3>
-                    </div>
-                    <div id="quick-activity-feed">
-                      <p style="color: #666">
-                        Faça uma análise para ver as estatísticas
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="grid-col-4">
-                  <div class="widget">
-                    <div class="widget__header">
-                      <h3 class="widget__title">
-                        <i class="fas fa-smile"></i> Sentimento
-                      </h3>
-                    </div>
-                    <div id="quick-sentiment-preview">
-                      <p style="color: #666">
-                        Análise de sentimento não disponível
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="grid-col-4">
-                  <div class="widget">
-                    <div class="widget__header">
-                      <h3 class="widget__title">
-                        <i class="fas fa-users"></i> Top Interações
-                      </h3>
-                    </div>
-                    <div id="quick-top-interactions">
-                      <p style="color: #666">Sem dados de interações</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
 
-            <!-- ========================================= -->
-            <!-- TAB: TRACKING (Formulário de Rastreamento) -->
-            <!-- ========================================= -->
-            <div id="tab-tracking" class="tab-pane">
-              <section class="tracking-panel">
-                <div class="panel-header">
-                  <i class="fas fa-search"></i>
-                  <h2>Rastreamento de Atividades</h2>
+            <!-- IA Assistente -->
+            <div class="glass-card p-6 border-l-4 border-l-purple-500 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <i data-lucide="brain" class="w-24 h-24 text-purple-600"></i>
                 </div>
-                <p class="panel-description">
-                  Rastreie <strong>atividades que uma pessoa FEZ</strong> no
-                  Instagram: curtidas e comentários dados para outros usuários
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2.5 bg-purple-100 text-purple-600 rounded-xl">
+                        <i data-lucide="sparkles" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-xl text-gray-800 display-font">Insight Diário</h3>
+                </div>
+                <p class="text-gray-600 text-sm leading-relaxed mb-6">
+                    A Lua transita por Virgem hoje. Excelente dia para organizar sua rotina de exercícios e focar na alimentação. Seus dados mostram que seu corpo responde bem a treinos leves hoje.
                 </p>
+                <button class="w-full py-2.5 px-4 rounded-xl bg-purple-50 text-purple-700 font-semibold text-sm hover:bg-purple-100 transition-colors flex items-center justify-center gap-2 group-hover:shadow-sm">
+                    <i data-lucide="message-circle" class="w-4 h-4"></i>
+                    Conversar com IA
+                </button>
+            </div>
 
-                <div
-                  id="intelligence-progress-container"
-                  class="intelligence-progress-container"
-                ></div>
-
-                <form id="tracking-form" class="tracking-form">
-                  <div class="form-group">
-                    <label for="targetUsername">
-                      <i class="fas fa-user"></i>
-                      Usuário para Rastrear
-                    </label>
-                    <input
-                      type="text"
-                      id="targetUsername"
-                      name="username"
-                      placeholder="usuario_para_rastrear"
-                      required
-                    />
-                    <small>Digite o nome de usuário do Instagram (sem @)</small>
-                  </div>
-
-                  <div class="form-section optional-section">
-                    <h3>
-                      <i class="fas fa-key"></i>
-                      Login Opcional (Para Mais Dados)
-                    </h3>
-                    <p class="section-description">
-                      <strong>Completamente opcional!</strong> Forneça suas
-                      credenciais para obter mais dados detalhados. <br /><span
-                        class="highlight"
-                        >A ferramenta funciona 100% sem login.</span
-                      >
-                    </p>
-
-                    <div class="form-row">
-                      <div class="form-group">
-                        <label for="loginUsername">
-                          <i class="fas fa-user-circle"></i>
-                          Seu Usuário Instagram
-                        </label>
-                        <input
-                          type="text"
-                          id="loginUsername"
-                          name="login_username"
-                          placeholder="seu_usuario (opcional)"
-                        />
-                      </div>
-                      <div class="form-group">
-                        <label for="loginPassword">
-                          <i class="fas fa-lock"></i>
-                          Sua Senha
-                        </label>
-                        <input
-                          type="password"
-                          id="loginPassword"
-                          name="login_password"
-                          placeholder="sua_senha (opcional)"
-                        />
-                      </div>
+            <!-- Metas -->
+            <div class="glass-card p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-coral-50 text-coral-500 rounded-xl">
+                            <i data-lucide="target" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-xl text-gray-800 display-font">Progresso</h3>
                     </div>
-                  </div>
-
-                  <div class="form-section advanced-section">
-                    <h3>
-                      <i class="fas fa-cogs"></i>
-                      Configurações Avançadas
-                    </h3>
-
-                    <div class="form-row">
-                      <div class="form-group">
-                        <label for="maxFollowing">
-                          <i class="fas fa-users"></i>
-                          Máximo de Perfis a Analisar
-                        </label>
-                        <input
-                          type="number"
-                          id="maxFollowing"
-                          name="max_following"
-                          value="20"
-                          min="1"
-                          max="100"
-                        />
-                        <small
-                          >Mais perfis = mais dados, mas demora mais
-                          tempo</small
-                        >
-                      </div>
-
-                      <div class="form-group">
-                        <label for="ignoredUsers">
-                          <i class="fas fa-user-slash"></i>
-                          Usuários a Ignorar
-                        </label>
-                        <input
-                          type="text"
-                          id="ignoredUsers"
-                          name="ignored_users"
-                          placeholder="usuario1, usuario2"
-                        />
-                        <small>Separe por vírgula</small>
-                      </div>
+                    <span class="text-sm font-semibold text-teal-600 bg-teal-50 px-3 py-1 rounded-full">85%</span>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-sm mb-1 text-gray-600 font-medium">
+                            <span>Hidratação (2L)</span>
+                            <span>1.5L</span>
+                        </div>
+                        <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-blue-400 rounded-full" style="width: 75%"></div>
+                        </div>
                     </div>
-                  </div>
-
-                  <div class="form-actions">
-                    <button type="submit" id="trackBtn" class="btn btn-primary">
-                      <i class="fas fa-play"></i>
-                      Iniciar Rastreamento
-                    </button>
-                    <button type="reset" class="btn btn-secondary">
-                      <i class="fas fa-undo"></i>
-                      Limpar
-                    </button>
-                  </div>
-                </form>
-              </section>
-            </div>
-
-            <!-- ========================================= -->
-            <!-- TAB: ACTIVITIES -->
-            <!-- ========================================= -->
-            <div id="tab-activities" class="tab-pane">
-              <div class="widget">
-                <div class="widget__header">
-                  <h3 class="widget__title">
-                    <i class="fas fa-heart"></i> Atividades Rastreadas
-                  </h3>
-                  <div class="widget__actions">
-                    <div class="export-menu">
-                      <button class="widget__action-btn" title="Exportar">
-                        <i class="fas fa-download"></i>
-                      </button>
-                      <div class="export-dropdown">
-                        <button
-                          class="export-option"
-                          onclick="exportData('json')"
-                        >
-                          <i class="fas fa-file-code"></i> JSON
-                        </button>
-                        <button
-                          class="export-option"
-                          onclick="exportData('csv')"
-                        >
-                          <i class="fas fa-file-csv"></i> CSV
-                        </button>
-                      </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1 text-gray-600 font-medium">
+                            <span>Meditação (20m)</span>
+                            <span>20m</span>
+                        </div>
+                        <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-teal-400 rounded-full" style="width: 100%"></div>
+                        </div>
                     </div>
-                  </div>
-                </div>
-
-                <!-- Stats -->
-                <div id="activity-stats"></div>
-
-                <!-- Top Interactors (Affinity) -->
-                <div
-                  id="affinity-widget"
-                  class="affinity-widget-container"
-                ></div>
-
-                <!-- Filtros -->
-                <div class="tabs" style="margin: var(--spacing-lg) 0">
-                  <button class="tab-btn active" data-filter="all">
-                    <i class="fas fa-list"></i> Todas
-                  </button>
-                  <button class="tab-btn" data-filter="like">
-                    <i class="fas fa-heart"></i> Curtidas
-                  </button>
-                  <button class="tab-btn" data-filter="comment">
-                    <i class="fas fa-comment"></i> Comentários
-                  </button>
-                  <button class="tab-btn" data-filter="mention">
-                    <i class="fas fa-at"></i> Menções
-                  </button>
-                </div>
-
-                <!-- Lista de Atividades -->
-                <div id="activities-list" class="activities-list">
-                  <div class="empty-state">
-                    <i
-                      class="fas fa-inbox"
-                      style="font-size: 3rem; color: #ccc"
-                    ></i>
-                    <p>Faça um rastreamento para ver as atividades</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- ========================================= -->
-            <!-- TAB: SENTIMENT -->
-            <!-- ========================================= -->
-            <div id="tab-sentiment" class="tab-pane">
-              <div id="sentiment-widget">
-                <div class="widget sentiment-widget">
-                  <div class="widget__header">
-                    <h3 class="widget__title">
-                      <i class="fas fa-smile"></i> Análise de Sentimento
-                    </h3>
-                    <button
-                      class="btn btn-primary btn-small"
-                      onclick="loadSentimentAnalysis()"
-                    >
-                      <i class="fas fa-sync"></i> Analisar
-                    </button>
-                  </div>
-                  <p
-                    style="
-                      color: #666;
-                      text-align: center;
-                      padding: var(--spacing-xl);
-                    "
-                  >
-                    Selecione um perfil e clique em "Analisar" para ver a
-                    análise de sentimento
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- ========================================= -->
-            <!-- TAB: PREDICTIVE -->
-            <!-- ========================================= -->
-            <div id="tab-predictive" class="tab-pane">
-              <div id="predictive-widget">
-                <div class="widget predictive-widget">
-                  <div class="widget__header">
-                    <h3 class="widget__title">
-                      <i class="fas fa-chart-line"></i> Análise Preditiva
-                    </h3>
-                    <button
-                      class="btn btn-primary btn-small"
-                      onclick="loadPredictiveAnalysis()"
-                    >
-                      <i class="fas fa-sync"></i> Analisar
-                    </button>
-                  </div>
-                  <p
-                    style="
-                      color: #666;
-                      text-align: center;
-                      padding: var(--spacing-xl);
-                    "
-                  >
-                    Análise de padrões comportamentais e previsão de atividade
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- ========================================= -->
-            <!-- TAB: VISION -->
-            <!-- ========================================= -->
-            <div id="tab-vision" class="tab-pane">
-              <div id="vision-widget">
-                <div class="widget vision-widget">
-                  <div class="widget__header">
-                    <h3 class="widget__title">
-                      <i class="fas fa-eye"></i> Visão Computacional
-                    </h3>
-                    <button
-                      class="btn btn-primary btn-small"
-                      onclick="loadVisualAnalysis()"
-                    >
-                      <i class="fas fa-sync"></i> Analisar Imagens
-                    </button>
-                  </div>
-                  <p
-                    style="
-                      color: #666;
-                      text-align: center;
-                      padding: var(--spacing-xl);
-                    "
-                  >
-                    Análise de imagens do perfil com YOLOv8
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- ========================================= -->
-            <!-- TAB: NETWORK -->
-            <!-- ========================================= -->
-            <div id="tab-network" class="tab-pane">
-              <div class="widget network-widget">
-                <div class="widget__header">
-                  <h3 class="widget__title">
-                    <i class="fas fa-project-diagram"></i> Grafo de Rede Social
-                  </h3>
-                </div>
-                <div class="network-container" id="network-graph">
-                  <p
-                    style="color: #fff; text-align: center; padding-top: 200px"
-                  >
-                    Grafo de rede será exibido aqui após análise
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- ========================================= -->
-            <!-- TAB: LOCATIONS -->
-            <!-- ========================================= -->
-            <div id="tab-locations" class="tab-pane">
-              <div class="widget">
-                <div class="widget__header">
-                  <h3 class="widget__title">
-                    <i class="fas fa-map-marker-alt"></i> Mapa de Localizações
-                  </h3>
-                </div>
-                <div id="location-map" style="height: 500px; width: 100%">
-                  <p
-                    style="
-                      color: #666;
-                      text-align: center;
-                      padding-top: 200px;
-                    "
-                  >
-                    Mapa de calor será exibido aqui
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- ========================================= -->
-            <!-- TAB: TOP INTERACTIONS -->
-            <!-- ========================================= -->
-            <div id="tab-top-interactions" class="tab-pane">
-              <div class="dashboard-grid">
-                <div class="grid-col-6">
-                  <div class="widget" id="top-outgoing-widget">
-                    <div class="widget__header">
-                      <h3 class="widget__title">
-                        <i class="fas fa-arrow-up"></i> Top Interações (Saída)
-                      </h3>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1 text-gray-600 font-medium">
+                            <span>Proteína (120g)</span>
+                            <span>80g</span>
+                        </div>
+                        <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-coral-400 rounded-full" style="width: 66%"></div>
+                        </div>
                     </div>
-                    <div class="list-container">
-                      <p style="color: #666; padding: 20px">
-                        Aguardando dados...
-                      </p>
-                    </div>
-                  </div>
                 </div>
-                <div class="grid-col-6">
-                  <div class="widget" id="top-incoming-widget">
-                    <div class="widget__header">
-                      <h3 class="widget__title">
-                        <i class="fas fa-arrow-down"></i> Top Interações
-                        (Entrada)
-                      </h3>
-                    </div>
-                    <div class="list-container">
-                      <p style="color: #666; padding: 20px">
-                        Aguardando dados...
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
 
-            <!-- ========================================= -->
-            <!-- TAB: OSINT -->
-            <!-- ========================================= -->
-            <div id="tab-osint" class="tab-pane">
-              <div class="widget">
-                <div class="widget__header">
-                  <h3 class="widget__title">
-                    <i class="fas fa-search-plus"></i> OSINT Cross-Platform
-                  </h3>
+            <!-- Mapa Astral Resumo (Span 2) -->
+            <div class="glass-card md:col-span-2 p-6 flex flex-col justify-center items-center text-center py-12 border border-purple-100 bg-gradient-to-br from-white to-purple-50/30">
+                <div class="w-20 h-20 rounded-full bg-white shadow-md flex items-center justify-center mb-4 relative">
+                    <div class="absolute inset-0 rounded-full border border-purple-200 animate-spin-slow"></div>
+                    <i data-lucide="sun" class="w-10 h-10 text-golden-500"></i>
                 </div>
-                <div id="platform-results">
-                  <p style="color: #666; text-align: center; padding: 50px">
-                    Ferramentas de investigação OSINT
-                  </p>
-                </div>
-              </div>
+                <h3 class="text-2xl font-bold display-font text-gray-800 mb-2">Seu Mapa de Longevidade</h3>
+                <p class="text-gray-500 max-w-md mx-auto mb-6">
+                    Seu sol em Leão indica uma vitalidade natural forte. O trânsito atual de Saturno pede atenção à saúde óssea e flexibilidade.
+                </p>
+                <button class="py-3 px-6 rounded-full bg-gray-900 text-white font-semibold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                    Visualizar Mapa Completo
+                </button>
             </div>
 
-            <!-- ========================================= -->
-            <!-- TAB: BREACH -->
-            <!-- ========================================= -->
-            <div id="tab-breach" class="tab-pane">
-              <div class="widget">
-                <div class="widget__header">
-                  <h3 class="widget__title">
-                    <i class="fas fa-shield-alt"></i> Verificação de Vazamentos
-                  </h3>
-                </div>
-                <div id="breach-results">
-                  <p style="color: #666; text-align: center; padding: 50px">
-                    Verificador de vazamento de dados
-                  </p>
-                </div>
-              </div>
-            </div>
+        </div>
 
-            <!-- ========================================= -->
-            <!-- TAB: CHAT -->
-            <!-- ========================================= -->
-            <div id="tab-chat" class="tab-pane">
-              <div class="widget" style="height: calc(100vh - 200px)">
-                <div class="widget__header">
-                  <h3 class="widget__title">
-                    <i class="fas fa-comments"></i> Chat & Notas
-                  </h3>
-                </div>
-                <div id="chat-widget-container" style="height: 100%">
-                  <p style="color: #666; text-align: center; padding: 50px">
-                    Sistema de anotações e chat
-                  </p>
-                </div>
-              </div>
-            </div>
+    </main>
 
-            <!-- ========================================= -->
-            <!-- TAB: AI SETTINGS -->
-            <!-- ========================================= -->
-            <div id="tab-ai-settings" class="tab-pane">
-              <div class="widget">
-                <div class="widget__header">
-                  <h3 class="widget__title">
-                    <i class="fas fa-robot"></i> Configurações de IA
-                  </h3>
-                </div>
-                <div class="settings-form">
-                  <p style="color: #666; padding: 20px">
-                    Configurações dos modelos de IA e chaves de API
-                  </p>
-                </div>
-              </div>
-            </div>
-
-    <!-- Scripts -->
-    <script type="module">
-      import { Dashboard } from "{{ url_for('static', filename='js/components/Dashboard.js') }}";
-
-      document.addEventListener("DOMContentLoaded", () => {
-        const dashboard = new Dashboard();
-        dashboard.init();
-        window.dashboard = dashboard;
-      });
+    <script>
+        lucide.createIcons();
     </script>
-  </body>
+</body>
 </html>
