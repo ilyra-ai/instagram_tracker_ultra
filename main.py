@@ -34,7 +34,7 @@ def run_api(host: str = "127.0.0.1", port: int = 5000, debug: bool = True):
     
     try:
         from api.flask_api_fixed import app, socketio
-        socketio.run(app, host=host, port=port, debug=debug)
+        socketio.run(app, host=host, port=port, debug=debug, allow_unsafe_werkzeug=True)
     except ImportError as e:
         logger.error(f"❌ Erro de import: {e}")
         logger.info("💡 Certifique-se de instalar as dependências: pip install -r requirements.txt")
