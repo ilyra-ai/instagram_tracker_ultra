@@ -1,150 +1,67 @@
-<!-- 
-SIDEBAR CORRIGIDA - Instagram Intelligence System 2026
-Copie este conteúdo e substitua a sidebar no dashboard.html
-(da linha <aside class="sidebar"> até </aside>)
--->
+<!-- Cosmic Navigation Sidebar -->
+<aside class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-white/80 backdrop-blur-xl border-r border-gray-100 flex flex-col transition-transform -translate-x-full md:translate-x-0">
+    <div class="h-20 flex items-center px-6 border-b border-gray-100/50">
+        <a href="/" class="flex items-center gap-3 w-full group">
+            <div class="p-2 rounded-xl bg-teal-50 text-teal-600 group-hover:bg-teal-100 transition-colors">
+                <i data-lucide="sparkles" class="w-6 h-6"></i>
+            </div>
+            <span class="display-font text-xl font-bold bg-teal-gradient text-gradient">Lyra</span>
+        </a>
+    </div>
 
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar__header">
-                <a href="/" class="sidebar__logo">
-                    <i class="fab fa-instagram"></i>
-                    <span class="sidebar__text">Intelligence 2026</span>
+    <div class="flex-1 overflow-y-auto py-6 px-4 space-y-6">
+        <!-- Navegação Principal -->
+        <div>
+            <h3 class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Portal</h3>
+            <nav class="space-y-1">
+                <a href="#dashboard" class="nav-item active flex items-center gap-3 px-3 py-2.5 rounded-xl text-teal-700 bg-teal-50/50 font-medium transition-all group">
+                    <i data-lucide="layout-grid" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                    Dashboard
                 </a>
-                <button class="sidebar__toggle" title="Recolher/Expandir">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-
-            <nav class="sidebar__nav">
-                <!-- Seção Principal -->
-                <div class="sidebar__section">
-                    <span class="sidebar__section-title">Principal</span>
-                    <ul class="sidebar__menu">
-                        <li class="sidebar__item">
-                            <a href="#overview" class="sidebar__link active" data-tab="overview">
-                                <i class="fas fa-home"></i>
-                                <span class="sidebar__text">Visão Geral</span>
-                            </a>
-                        </li>
-                        <li class="sidebar__item">
-                            <a href="#tracking" class="sidebar__link" data-tab="tracking">
-                                <i class="fas fa-search"></i>
-                                <span class="sidebar__text">Rastreamento</span>
-                            </a>
-                        </li>
-                        <li class="sidebar__item">
-                            <a href="#activities" class="sidebar__link" data-tab="activities">
-                                <i class="fas fa-heart"></i>
-                                <span class="sidebar__text">Atividades</span>
-                                <span class="sidebar__badge" id="activities-badge" style="display:none;">0</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Seção Inteligência -->
-                <div class="sidebar__section">
-                    <span class="sidebar__section-title">Inteligência IA</span>
-                    <ul class="sidebar__menu">
-                        <li class="sidebar__item">
-                            <a href="#sentiment" class="sidebar__link" data-tab="sentiment">
-                                <i class="fas fa-smile"></i>
-                                <span class="sidebar__text">Sentimento</span>
-                            </a>
-                        </li>
-                        <li class="sidebar__item">
-                            <a href="#predictive" class="sidebar__link" data-tab="predictive">
-                                <i class="fas fa-chart-line"></i>
-                                <span class="sidebar__text">Preditivo</span>
-                            </a>
-                        </li>
-                        <li class="sidebar__item">
-                            <a href="#vision" class="sidebar__link" data-tab="vision">
-                                <i class="fas fa-eye"></i>
-                                <span class="sidebar__text">Visão IA</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Seção Rede -->
-                <div class="sidebar__section">
-                    <span class="sidebar__section-title">Análise de Rede</span>
-                    <ul class="sidebar__menu">
-                        <li class="sidebar__item">
-                            <a href="#network" class="sidebar__link" data-tab="network">
-                                <i class="fas fa-project-diagram"></i>
-                                <span class="sidebar__text">Grafo de Rede</span>
-                            </a>
-                        </li>
-                        <li class="sidebar__item">
-                            <a href="#locations" class="sidebar__link" data-tab="locations">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span class="sidebar__text">Localizações</span>
-                            </a>
-                        </li>
-                        <li class="sidebar__item">
-                            <a href="#top-interactions" class="sidebar__link" data-tab="top-interactions">
-                                <i class="fas fa-users"></i>
-                                <span class="sidebar__text">Top Interações</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Seção OSINT -->
-                <div class="sidebar__section">
-                    <span class="sidebar__section-title">OSINT</span>
-                    <ul class="sidebar__menu">
-                        <li class="sidebar__item">
-                            <a href="#osint" class="sidebar__link" data-tab="osint">
-                                <i class="fas fa-search-plus"></i>
-                                <span class="sidebar__text">Cross-Platform</span>
-                            </a>
-                        </li>
-                        <li class="sidebar__item">
-                            <a href="#breach" class="sidebar__link" data-tab="breach">
-                                <i class="fas fa-shield-alt"></i>
-                                <span class="sidebar__text">Breach Check</span>
-                                <span class="sidebar__badge" id="breach-badge" style="display:none;">0</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Seção Ferramentas -->
-                <div class="sidebar__section">
-                    <span class="sidebar__section-title">Ferramentas</span>
-                    <ul class="sidebar__menu">
-                        <li class="sidebar__item">
-                            <a href="#chat" class="sidebar__link" data-tab="chat">
-                                <i class="fas fa-comments"></i>
-                                <span class="sidebar__text">Chat / Notas</span>
-                                <span class="sidebar__badge" id="chat-badge" style="display:none;">0</span>
-                            </a>
-                        </li>
-                        <li class="sidebar__item">
-                            <a href="#ai-settings" class="sidebar__link" data-tab="ai-settings">
-                                <i class="fas fa-robot"></i>
-                                <span class="sidebar__text">Config. IA</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                <a href="#metricas" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all group">
+                    <i data-lucide="activity" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                    Métricas Vitais
+                </a>
+                <a href="#transito" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all group">
+                    <i data-lucide="moon" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                    Trânsito Astral
+                </a>
+                <a href="#ia" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all group">
+                    <i data-lucide="brain" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                    Chat IA
+                </a>
             </nav>
+        </div>
 
-            <div class="sidebar__footer">
-                <div class="sidebar__user">
-                    <div class="sidebar__avatar">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="sidebar__text">
-                        <div style="font-weight:600;">Sistema</div>
-                        <div style="font-size:0.8rem;color:#666;">v2026.1.0</div>
-                    </div>
+        <!-- Ferramentas -->
+        <div>
+            <h3 class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Ferramentas</h3>
+            <nav class="space-y-1">
+                <a href="#metas" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all group">
+                    <i data-lucide="target" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                    Metas
+                </a>
+                <a href="#dispositivos" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all group">
+                    <i data-lucide="smartphone" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                    Dispositivos
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Perfil -->
+    <div class="p-4 border-t border-gray-100 bg-gray-50/50">
+        <a href="#perfil" class="flex items-center gap-3 p-2 rounded-xl hover:bg-white hover:shadow-sm transition-all group">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-teal-400 to-coral-400 p-0.5">
+                <div class="w-full h-full rounded-full bg-white flex items-center justify-center">
+                    <img src="https://ui-avatars.com/api/?name=Admin+Lyra&background=e0f2f1&color=00897b" alt="Avatar" class="w-full h-full rounded-full">
                 </div>
             </div>
-        </aside>
-
-        <!-- Overlay para mobile -->
-        <div class="sidebar-overlay"></div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-900 truncate">Admin Lyra</p>
+                <p class="text-xs text-coral-500 font-medium truncate">Plano Cósmico</p>
+            </div>
+            <i data-lucide="settings" class="w-5 h-5 text-gray-400 group-hover:rotate-90 transition-transform duration-300"></i>
+        </a>
+    </div>
+</aside>
