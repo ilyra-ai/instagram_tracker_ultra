@@ -1,4 +1,21 @@
-<!DOCTYPE html>
+import re
+import subprocess
+
+# Read original file completely to analyze and extract the proper selectors that JS might use
+process = subprocess.Popen(['git', 'show', 'origin/main:templates/dashboard.html'], stdout=subprocess.PIPE)
+original_html, _ = process.communicate()
+original_html = original_html.decode('utf-8')
+
+# Grab the whole <main class="main-content"> ... </main> block
+main_content_match = re.search(r'<main class="main-content">(.*?)</main>', original_html, re.DOTALL)
+main_content = main_content_match.group(1) if main_content_match else ""
+
+# Grab the script block at the end
+dashboard_js_match = re.search(r'<script type="module">.*?</script>', original_html, re.DOTALL)
+dashboard_js = dashboard_js_match.group(0) if dashboard_js_match else ""
+
+# Replace dashboard.html to merge new bento grid with original backend integrations
+html = f"""<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -42,7 +59,7 @@
         </div>
     </header>
 
-    {% include 'sidebar_fixed.html' %}
+    {{% include 'sidebar_fixed.html' %}}
 
     <!-- Main Content Bento Grid -->
     <main class="pt-24 pb-12 px-4 md:px-8 max-w-7xl mx-auto md:ml-64 transition-all duration-300">
@@ -143,7 +160,7 @@
                 
                 <!-- ORIGINAL TABS & WIDGETS WRAPPED -->
                 <div class="main-content" style="padding: 0; background: transparent;">
-
+{main_content}
                 </div>
             </div>
 
@@ -154,14 +171,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <script>lucide.createIcons();</script>
-    <script type="module">
-      import { Dashboard } from "{{ url_for('static', filename='js/components/Dashboard.js') }}";
-
-      document.addEventListener("DOMContentLoaded", () => {
-        const dashboard = new Dashboard();
-        dashboard.init();
-        window.dashboard = dashboard;
-      });
-    </script>
+    {dashboard_js}
 </body>
 </html>
+"""
+
+with open('templates/dashboard.html', 'w') as f:
+    f.write(html)
