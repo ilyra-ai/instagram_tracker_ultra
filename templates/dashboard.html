@@ -138,15 +138,592 @@
                     <div class="p-2.5 bg-coral-50 text-coral-500 rounded-xl">
                         <i data-lucide="target" class="w-6 h-6"></i>
                     </div>
-                    <h3 class="font-bold text-xl text-gray-800 display-font">Módulos de Inteligência Avançada</h3></div>
-<div class="main-content" style="padding: 0; background: transparent;">
-
-</div>
+                    <h3 class="font-bold text-xl text-gray-800 display-font">Módulos de Inteligência Avançada</h3>
+                </div>
                 
                 <!-- ORIGINAL TABS & WIDGETS WRAPPED -->
-                <div class="main-content" style="padding: 0; background: transparent;">
+                <main class="main-content">
+        <header class="top-bar">
+          <div class="top-bar__search">
+            <i class="fas fa-search"></i>
+            <input
+              type="text"
+              id="global-search"
+              placeholder="Buscar em toda a inteligência..."
+            />
+          </div>
+          <div class="top-bar__actions">
+            <button class="action-btn" title="Notificações">
+              <i class="fas fa-bell"></i>
+              <span class="badge">3</span>
+            </button>
+            <button class="action-btn" title="Configurações">
+              <i class="fas fa-cog"></i>
+            </button>
+          </div>
+        </header>
 
-</div>
+        <div class="content-wrapper">
+          <div id="dashboard-content" class="tab-content">
+            <!-- ========================================= -->
+            <!-- TAB: DASHBOARD (Visão Geral) -->
+            <!-- ========================================= -->
+            <div id="tab-dashboard" class="tab-pane active">
+              <div class="dashboard-grid">
+                <!-- Profile Card -->
+                <div class="grid-col-4">
+                  <div id="profile-card-container">
+                    <div class="widget profile-placeholder">
+                      <div class="placeholder-avatar"></div>
+                      <div class="placeholder-lines">
+                        <div class="line"></div>
+                        <div class="line short"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Stats Overview -->
+                <div class="grid-col-8">
+                  <div class="stats-row">
+                    <div class="stat-card">
+                      <div class="stat-icon"><i class="fas fa-heart"></i></div>
+                      <div class="stat-info">
+                        <span class="stat-label">Total Likes</span>
+                        <span class="stat-value" id="stat-likes">0</span>
+                      </div>
+                    </div>
+                    <div class="stat-card">
+                      <div class="stat-icon">
+                        <i class="fas fa-comment"></i>
+                      </div>
+                      <div class="stat-info">
+                        <span class="stat-label">Comentários</span>
+                        <span class="stat-value" id="stat-comments">0</span>
+                      </div>
+                    </div>
+                    <div class="stat-card">
+                      <div class="stat-icon"><i class="fas fa-at"></i></div>
+                      <div class="stat-info">
+                        <span class="stat-label">Menções</span>
+                        <span class="stat-value" id="stat-mentions">0</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="widget engagement-widget">
+                    <div class="widget__header">
+                      <h3 class="widget__title">
+                        <i class="fas fa-chart-area"></i> Velocidade de
+                        Interação
+                      </h3>
+                    </div>
+                    <div
+                      id="engagement-chart-container"
+                      class="chart-container"
+                    >
+                      <p
+                        style="
+                          color: #666;
+                          text-align: center;
+                          padding-top: 50px;
+                        "
+                      >
+                        Aguardando dados de rastreamento...
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Secondary Row -->
+                <div class="grid-col-4">
+                  <div class="widget">
+                    <div class="widget__header">
+                      <h3 class="widget__title">
+                        <i class="fas fa-history"></i> Atividades Recentes
+                      </h3>
+                    </div>
+                    <div id="quick-activity-feed">
+                      <p style="color: #666">
+                        Faça uma análise para ver as estatísticas
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="grid-col-4">
+                  <div class="widget">
+                    <div class="widget__header">
+                      <h3 class="widget__title">
+                        <i class="fas fa-smile"></i> Sentimento
+                      </h3>
+                    </div>
+                    <div id="quick-sentiment-preview">
+                      <p style="color: #666">
+                        Análise de sentimento não disponível
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="grid-col-4">
+                  <div class="widget">
+                    <div class="widget__header">
+                      <h3 class="widget__title">
+                        <i class="fas fa-users"></i> Top Interações
+                      </h3>
+                    </div>
+                    <div id="quick-top-interactions">
+                      <p style="color: #666">Sem dados de interações</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========================================= -->
+            <!-- TAB: TRACKING (Formulário de Rastreamento) -->
+            <!-- ========================================= -->
+            <div id="tab-tracking" class="tab-pane">
+              <section class="tracking-panel">
+                <div class="panel-header">
+                  <i class="fas fa-search"></i>
+                  <h2>Rastreamento de Atividades</h2>
+                </div>
+                <p class="panel-description">
+                  Rastreie <strong>atividades que uma pessoa FEZ</strong> no
+                  Instagram: curtidas e comentários dados para outros usuários
+                </p>
+
+                <div
+                  id="intelligence-progress-container"
+                  class="intelligence-progress-container"
+                ></div>
+
+                <form id="tracking-form" class="tracking-form">
+                  <div class="form-group">
+                    <label for="targetUsername">
+                      <i class="fas fa-user"></i>
+                      Usuário para Rastrear
+                    </label>
+                    <input
+                      type="text"
+                      id="targetUsername"
+                      name="username"
+                      placeholder="usuario_para_rastrear"
+                      required
+                    />
+                    <small>Digite o nome de usuário do Instagram (sem @)</small>
+                  </div>
+
+                  <div class="form-section optional-section">
+                    <h3>
+                      <i class="fas fa-key"></i>
+                      Login Opcional (Para Mais Dados)
+                    </h3>
+                    <p class="section-description">
+                      <strong>Completamente opcional!</strong> Forneça suas
+                      credenciais para obter mais dados detalhados. <br /><span
+                        class="highlight"
+                        >A ferramenta funciona 100% sem login.</span
+                      >
+                    </p>
+
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="loginUsername">
+                          <i class="fas fa-user-circle"></i>
+                          Seu Usuário Instagram
+                        </label>
+                        <input
+                          type="text"
+                          id="loginUsername"
+                          name="login_username"
+                          placeholder="seu_usuario (opcional)"
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label for="loginPassword">
+                          <i class="fas fa-lock"></i>
+                          Sua Senha
+                        </label>
+                        <input
+                          type="password"
+                          id="loginPassword"
+                          name="login_password"
+                          placeholder="sua_senha (opcional)"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-section advanced-section">
+                    <h3>
+                      <i class="fas fa-cogs"></i>
+                      Configurações Avançadas
+                    </h3>
+
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="maxFollowing">
+                          <i class="fas fa-users"></i>
+                          Máximo de Perfis a Analisar
+                        </label>
+                        <input
+                          type="number"
+                          id="maxFollowing"
+                          name="max_following"
+                          value="20"
+                          min="1"
+                          max="100"
+                        />
+                        <small
+                          >Mais perfis = mais dados, mas demora mais
+                          tempo</small
+                        >
+                      </div>
+
+                      <div class="form-group">
+                        <label for="ignoredUsers">
+                          <i class="fas fa-user-slash"></i>
+                          Usuários a Ignorar
+                        </label>
+                        <input
+                          type="text"
+                          id="ignoredUsers"
+                          name="ignored_users"
+                          placeholder="usuario1, usuario2"
+                        />
+                        <small>Separe por vírgula</small>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-actions">
+                    <button type="submit" id="trackBtn" class="btn btn-primary">
+                      <i class="fas fa-play"></i>
+                      Iniciar Rastreamento
+                    </button>
+                    <button type="reset" class="btn btn-secondary">
+                      <i class="fas fa-undo"></i>
+                      Limpar
+                    </button>
+                  </div>
+                </form>
+              </section>
+            </div>
+
+            <!-- ========================================= -->
+            <!-- TAB: ACTIVITIES -->
+            <!-- ========================================= -->
+            <div id="tab-activities" class="tab-pane">
+              <div class="widget">
+                <div class="widget__header">
+                  <h3 class="widget__title">
+                    <i class="fas fa-heart"></i> Atividades Rastreadas
+                  </h3>
+                  <div class="widget__actions">
+                    <div class="export-menu">
+                      <button class="widget__action-btn" title="Exportar">
+                        <i class="fas fa-download"></i>
+                      </button>
+                      <div class="export-dropdown">
+                        <button
+                          class="export-option"
+                          onclick="exportData('json')"
+                        >
+                          <i class="fas fa-file-code"></i> JSON
+                        </button>
+                        <button
+                          class="export-option"
+                          onclick="exportData('csv')"
+                        >
+                          <i class="fas fa-file-csv"></i> CSV
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Stats -->
+                <div id="activity-stats"></div>
+
+                <!-- Top Interactors (Affinity) -->
+                <div
+                  id="affinity-widget"
+                  class="affinity-widget-container"
+                ></div>
+
+                <!-- Filtros -->
+                <div class="tabs" style="margin: var(--spacing-lg) 0">
+                  <button class="tab-btn active" data-filter="all">
+                    <i class="fas fa-list"></i> Todas
+                  </button>
+                  <button class="tab-btn" data-filter="like">
+                    <i class="fas fa-heart"></i> Curtidas
+                  </button>
+                  <button class="tab-btn" data-filter="comment">
+                    <i class="fas fa-comment"></i> Comentários
+                  </button>
+                  <button class="tab-btn" data-filter="mention">
+                    <i class="fas fa-at"></i> Menções
+                  </button>
+                </div>
+
+                <!-- Lista de Atividades -->
+                <div id="activities-list" class="activities-list">
+                  <div class="empty-state">
+                    <i
+                      class="fas fa-inbox"
+                      style="font-size: 3rem; color: #ccc"
+                    ></i>
+                    <p>Faça um rastreamento para ver as atividades</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========================================= -->
+            <!-- TAB: SENTIMENT -->
+            <!-- ========================================= -->
+            <div id="tab-sentiment" class="tab-pane">
+              <div id="sentiment-widget">
+                <div class="widget sentiment-widget">
+                  <div class="widget__header">
+                    <h3 class="widget__title">
+                      <i class="fas fa-smile"></i> Análise de Sentimento
+                    </h3>
+                    <button
+                      class="btn btn-primary btn-small"
+                      onclick="loadSentimentAnalysis()"
+                    >
+                      <i class="fas fa-sync"></i> Analisar
+                    </button>
+                  </div>
+                  <p
+                    style="
+                      color: #666;
+                      text-align: center;
+                      padding: var(--spacing-xl);
+                    "
+                  >
+                    Selecione um perfil e clique em "Analisar" para ver a
+                    análise de sentimento
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========================================= -->
+            <!-- TAB: PREDICTIVE -->
+            <!-- ========================================= -->
+            <div id="tab-predictive" class="tab-pane">
+              <div id="predictive-widget">
+                <div class="widget predictive-widget">
+                  <div class="widget__header">
+                    <h3 class="widget__title">
+                      <i class="fas fa-chart-line"></i> Análise Preditiva
+                    </h3>
+                    <button
+                      class="btn btn-primary btn-small"
+                      onclick="loadPredictiveAnalysis()"
+                    >
+                      <i class="fas fa-sync"></i> Analisar
+                    </button>
+                  </div>
+                  <p
+                    style="
+                      color: #666;
+                      text-align: center;
+                      padding: var(--spacing-xl);
+                    "
+                  >
+                    Análise de padrões comportamentais e previsão de atividade
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========================================= -->
+            <!-- TAB: VISION -->
+            <!-- ========================================= -->
+            <div id="tab-vision" class="tab-pane">
+              <div id="vision-widget">
+                <div class="widget vision-widget">
+                  <div class="widget__header">
+                    <h3 class="widget__title">
+                      <i class="fas fa-eye"></i> Visão Computacional
+                    </h3>
+                    <button
+                      class="btn btn-primary btn-small"
+                      onclick="loadVisualAnalysis()"
+                    >
+                      <i class="fas fa-sync"></i> Analisar Imagens
+                    </button>
+                  </div>
+                  <p
+                    style="
+                      color: #666;
+                      text-align: center;
+                      padding: var(--spacing-xl);
+                    "
+                  >
+                    Análise de imagens do perfil com YOLOv8
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========================================= -->
+            <!-- TAB: NETWORK -->
+            <!-- ========================================= -->
+            <div id="tab-network" class="tab-pane">
+              <div class="widget network-widget">
+                <div class="widget__header">
+                  <h3 class="widget__title">
+                    <i class="fas fa-project-diagram"></i> Grafo de Rede Social
+                  </h3>
+                </div>
+                <div class="network-container" id="network-graph">
+                  <p
+                    style="color: #fff; text-align: center; padding-top: 200px"
+                  >
+                    Grafo de rede será exibido aqui após análise
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========================================= -->
+            <!-- TAB: LOCATIONS -->
+            <!-- ========================================= -->
+            <div id="tab-locations" class="tab-pane">
+              <div class="widget">
+                <div class="widget__header">
+                  <h3 class="widget__title">
+                    <i class="fas fa-map-marker-alt"></i> Mapa de Localizações
+                  </h3>
+                </div>
+                <div id="location-map" style="height: 500px; width: 100%">
+                  <p
+                    style="
+                      color: #666;
+                      text-align: center;
+                      padding-top: 200px;
+                    "
+                  >
+                    Mapa de calor será exibido aqui
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========================================= -->
+            <!-- TAB: TOP INTERACTIONS -->
+            <!-- ========================================= -->
+            <div id="tab-top-interactions" class="tab-pane">
+              <div class="dashboard-grid">
+                <div class="grid-col-6">
+                  <div class="widget" id="top-outgoing-widget">
+                    <div class="widget__header">
+                      <h3 class="widget__title">
+                        <i class="fas fa-arrow-up"></i> Top Interações (Saída)
+                      </h3>
+                    </div>
+                    <div class="list-container">
+                      <p style="color: #666; padding: 20px">
+                        Aguardando dados...
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="grid-col-6">
+                  <div class="widget" id="top-incoming-widget">
+                    <div class="widget__header">
+                      <h3 class="widget__title">
+                        <i class="fas fa-arrow-down"></i> Top Interações
+                        (Entrada)
+                      </h3>
+                    </div>
+                    <div class="list-container">
+                      <p style="color: #666; padding: 20px">
+                        Aguardando dados...
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========================================= -->
+            <!-- TAB: OSINT -->
+            <!-- ========================================= -->
+            <div id="tab-osint" class="tab-pane">
+              <div class="widget">
+                <div class="widget__header">
+                  <h3 class="widget__title">
+                    <i class="fas fa-search-plus"></i> OSINT Cross-Platform
+                  </h3>
+                </div>
+                <div id="platform-results">
+                  <p style="color: #666; text-align: center; padding: 50px">
+                    Ferramentas de investigação OSINT
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========================================= -->
+            <!-- TAB: BREACH -->
+            <!-- ========================================= -->
+            <div id="tab-breach" class="tab-pane">
+              <div class="widget">
+                <div class="widget__header">
+                  <h3 class="widget__title">
+                    <i class="fas fa-shield-alt"></i> Verificação de Vazamentos
+                  </h3>
+                </div>
+                <div id="breach-results">
+                  <p style="color: #666; text-align: center; padding: 50px">
+                    Verificador de vazamento de dados
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========================================= -->
+            <!-- TAB: CHAT -->
+            <!-- ========================================= -->
+            <div id="tab-chat" class="tab-pane">
+              <div class="widget" style="height: calc(100vh - 200px)">
+                <div class="widget__header">
+                  <h3 class="widget__title">
+                    <i class="fas fa-comments"></i> Chat & Notas
+                  </h3>
+                </div>
+                <div id="chat-widget-container" style="height: 100%">
+                  <p style="color: #666; text-align: center; padding: 50px">
+                    Sistema de anotações e chat
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========================================= -->
+            <!-- TAB: AI SETTINGS -->
+            <!-- ========================================= -->
+            <div id="tab-ai-settings" class="tab-pane">
+              <div class="widget">
+                <div class="widget__header">
+                  <h3 class="widget__title">
+                    <i class="fas fa-robot"></i> Configurações de IA
+                  </h3>
+                </div>
+                <div class="settings-form">
+                  <p style="color: #666; padding: 20px">
+                    Configurações dos modelos de IA e chaves de API
+                  </p>
+                </div>
+              </div>
+            </div>
             </div>
 
         </div>
