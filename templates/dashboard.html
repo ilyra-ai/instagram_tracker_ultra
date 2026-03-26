@@ -141,6 +141,103 @@
                     <h3 class="font-bold text-xl text-gray-800 display-font">Módulos de Inteligência Avançada</h3>
                 </div>
 
+    <!-- Main Content Bento Grid -->
+    <main class="pt-24 pb-12 px-4 md:px-8 max-w-7xl mx-auto md:ml-64 transition-all duration-300">
+        
+        <div class="mb-8 animate-fade-in-up">
+            <h2 class="text-3xl font-bold display-font mb-2">Bem-vindo(a) de volta, Admin! ✨</h2>
+            <p class="text-gray-500 text-lg">Aqui está o panorama da sua jornada de longevidade cósmica hoje.</p>
+        </div>
+
+        <!-- Bento Grid with Cosmic Visuals and integrated legacy classes -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in" style="animation-delay: 0.1s;">
+            
+            <!-- Vitais Resumo / User Profile (Span 2) -->
+            <div class="glass-card md:col-span-2 p-6 flex flex-col justify-between relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <i data-lucide="heart-pulse" class="w-32 h-32 text-teal-600"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-2.5 bg-teal-100 text-teal-600 rounded-xl">
+                            <i data-lucide="activity" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-bold text-xl text-gray-800 display-font">Perfil Rastreado</h3>
+                    </div>
+                    <!-- Legacy integration point: where Dashboard.js injects user info -->
+                    <div id="profile-container" class="profile-header">
+                        <p class="text-gray-500 mb-6 text-sm">Pesquise um usuário na barra de busca para carregar as métricas do perfil.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                        <div class="text-gray-400 mb-1 flex items-center justify-between">
+                            <span class="text-xs font-semibold uppercase tracking-wide">BPM Médio</span>
+                            <i data-lucide="heart" class="w-4 h-4 text-rose-400"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-gray-800" id="stat-bpm">-- <span class="text-sm font-normal text-gray-500">bpm</span></div>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                        <div class="text-gray-400 mb-1 flex items-center justify-between">
+                            <span class="text-xs font-semibold uppercase tracking-wide">Qualidade do Sono</span>
+                            <i data-lucide="moon" class="w-4 h-4 text-indigo-400"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-gray-800" id="stat-sleep">-- <span class="text-sm font-normal text-gray-500">h</span></div>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                        <div class="text-gray-400 mb-1 flex items-center justify-between">
+                            <span class="text-xs font-semibold uppercase tracking-wide">Atividade Física</span>
+                            <i data-lucide="footprints" class="w-4 h-4 text-teal-400"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-gray-800" id="stat-steps">--</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                        <div class="text-gray-400 mb-1 flex items-center justify-between">
+                            <span class="text-xs font-semibold uppercase tracking-wide">Saúde Geral</span>
+                            <i data-lucide="waves" class="w-4 h-4 text-blue-400"></i>
+                        </div>
+                        <div class="text-2xl font-bold text-gray-800" id="stat-health">-- <span class="text-sm font-normal text-gray-500">%</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IA Assistente / Live Tracker Status -->
+            <div class="glass-card p-6 border-l-4 border-l-purple-500 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <i data-lucide="brain" class="w-24 h-24 text-purple-600"></i>
+                </div>
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2.5 bg-purple-100 text-purple-600 rounded-xl">
+                        <i data-lucide="sparkles" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-xl text-gray-800 display-font">Tracker IA</h3>
+                </div>
+                
+                <div id="status-container" class="status-indicator">
+                    <span class="status-dot"></span> <span id="current-status">Pronto para iniciar</span>
+                </div>
+                
+                <div id="live-events" class="live-events mt-4 mb-6 max-h-40 overflow-y-auto border border-gray-100 rounded-xl p-3 bg-white/50 text-sm space-y-2">
+                    <!-- Events injected by Dashboard.js -->
+                    <div class="text-gray-400 text-center italic">Aguardando eventos...</div>
+                </div>
+
+                <button id="btn-toggle-tracking" class="w-full py-2.5 px-4 rounded-xl bg-purple-50 text-purple-700 font-semibold text-sm hover:bg-purple-100 transition-colors flex items-center justify-center gap-2 group-hover:shadow-sm" disabled>
+                    <i data-lucide="play-circle" class="w-4 h-4"></i>
+                    Iniciar Tracking
+                </button>
+            </div>
+            
+            <!-- Analysis Section (Span 3) encapsulating the original tabs logic but hidden cleanly or presented in scrolling view -->
+            <div class="glass-card md:col-span-3 p-6 mt-8">
+               <div class="flex items-center gap-3 mb-6">
+                    <div class="p-2.5 bg-coral-50 text-coral-500 rounded-xl">
+                        <i data-lucide="target" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="font-bold text-xl text-gray-800 display-font">Módulos de Inteligência Avançada</h3>
+                </div>
+                
                 <!-- ORIGINAL TABS & WIDGETS WRAPPED -->
                 <main class="main-content">
         <header class="top-bar">

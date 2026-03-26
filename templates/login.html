@@ -126,12 +126,10 @@
 
     <script>
         lucide.createIcons();
-
         async function handleLogin(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
             const errorDiv = document.getElementById('error-message');
-
             btn.disabled = true;
             btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Autenticando...';
             lucide.createIcons();
