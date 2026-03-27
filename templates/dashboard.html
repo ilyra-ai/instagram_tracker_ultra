@@ -9,23 +9,33 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-[#F8F7FC] min-h-screen text-gray-900 font-sans antialiased overflow-x-hidden">
+<body id="app" class="bg-[#F8F7FC] min-h-screen text-gray-900 font-sans antialiased overflow-x-hidden">
+    <!-- Overlay for mobile sidebar -->
+    <div class="sidebar-overlay fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 hidden transition-opacity"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay fixed inset-0 bg-white/80 backdrop-blur-md z-[60] flex flex-col items-center justify-center transition-all" style="display: none;">
+        <div class="w-16 h-16 border-4 border-teal-100 border-t-teal-600 rounded-full animate-spin mb-4"></div>
+        <p class="text-teal-900 font-semibold animate-pulse">Processando dados cósmicos...</p>
+    </div>
 
     <!-- Navbar / Header -->
     <header class="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 z-40 flex items-center justify-between px-6 transition-all duration-300 md:ml-64">
         <div class="flex items-center gap-4">
-            <button id="mobile-menu-btn" class="p-2 -ml-2 rounded-lg text-gray-500 hover:bg-gray-100 md:hidden transition-colors">
+            <button id="mobile-menu-btn" class="mobile-menu-toggle p-2 -ml-2 rounded-lg text-gray-500 hover:bg-gray-100 md:hidden transition-colors">
                 <i data-lucide="menu" class="w-6 h-6"></i>
             </button>
             <h1 class="text-xl font-bold display-font hidden sm:block">Dashboard</h1>
         </div>
 
         <div class="flex items-center gap-4">
-            <!-- Form search-form for Dashboard.js compatibility -->
-            <form id="search-form" class="relative hidden md:flex items-center">
-                <i data-lucide="search" class="w-5 h-5 absolute left-3 text-gray-400"></i>
-                <input type="text" id="target-username" placeholder="Buscar perfil..." class="pl-10 pr-4 py-2 bg-gray-50 border-none rounded-full w-64 focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all text-sm outline-none">
-            </form>
+            <!-- Container para SearchAdvanced.js -->
+            <div id="search-container" class="relative hidden md:flex items-center">
+                <form id="search-form" class="relative flex items-center">
+                    <i data-lucide="search" class="w-5 h-5 absolute left-3 text-gray-400"></i>
+                    <input type="text" name="username" id="target-username" placeholder="Buscar perfil..." class="pl-10 pr-4 py-2 bg-gray-50 border-none rounded-full w-64 focus:ring-2 focus:ring-teal-500 focus:bg-white transition-all text-sm outline-none">
+                </form>
+            </div>
 
             <button class="relative p-2 rounded-full text-gray-500 hover:bg-teal-50 hover:text-teal-600 transition-colors">
                 <i data-lucide="bell" class="w-6 h-6"></i>
@@ -44,7 +54,7 @@
 
     {% include 'sidebar_fixed.html' %}
 
-    <!-- Main Content Bento Grid -->
+    <!-- Main Content -->
     <main class="pt-24 pb-12 px-4 md:px-8 max-w-7xl mx-auto md:ml-64 transition-all duration-300">
 
         <div class="mb-8 animate-fade-in-up">
@@ -52,10 +62,10 @@
             <p class="text-gray-500 text-lg">Aqui está o panorama da sua jornada de longevidade cósmica hoje.</p>
         </div>
 
-        <!-- Bento Grid with Cosmic Visuals and integrated legacy classes -->
+        <!-- Bento Grid with Cosmic Visuals -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in" style="animation-delay: 0.1s;">
 
-            <!-- Vitais Resumo / User Profile (Span 2) -->
+            <!-- Perfil Rastreado (Span 2) -->
             <div class="glass-card md:col-span-2 p-6 flex flex-col justify-between relative overflow-hidden group">
                 <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
                     <i data-lucide="heart-pulse" class="w-32 h-32 text-teal-600"></i>
@@ -67,40 +77,32 @@
                         </div>
                         <h3 class="font-bold text-xl text-gray-800 display-font">Perfil Rastreado</h3>
                     </div>
-                    <!-- Legacy integration point: where Dashboard.js injects user info -->
-                    <div id="profile-container" class="profile-header">
-                        <p class="text-gray-500 mb-6 text-sm">Pesquise um usuário na barra de busca para carregar as métricas do perfil.</p>
+                    <div id="profile-card">
+                        <p class="text-gray-500 mb-6 text-sm italic">Nenhum perfil carregado. Use a busca acima.</p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6">
                     <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
                         <div class="text-gray-400 mb-1 flex items-center justify-between">
-                            <span class="text-xs font-semibold uppercase tracking-wide">BPM Médio</span>
+                            <span class="text-xs font-semibold uppercase tracking-wide">Likes</span>
                             <i data-lucide="heart" class="w-4 h-4 text-rose-400"></i>
                         </div>
-                        <div class="text-2xl font-bold text-gray-800" id="stat-bpm">-- <span class="text-sm font-normal text-gray-500">bpm</span></div>
+                        <div class="text-2xl font-bold text-gray-800" id="stat-likes">0</div>
                     </div>
                     <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
                         <div class="text-gray-400 mb-1 flex items-center justify-between">
-                            <span class="text-xs font-semibold uppercase tracking-wide">Qualidade do Sono</span>
-                            <i data-lucide="moon" class="w-4 h-4 text-indigo-400"></i>
+                            <span class="text-xs font-semibold uppercase tracking-wide">Comentários</span>
+                            <i data-lucide="message-circle" class="w-4 h-4 text-indigo-400"></i>
                         </div>
-                        <div class="text-2xl font-bold text-gray-800" id="stat-sleep">-- <span class="text-sm font-normal text-gray-500">h</span></div>
+                        <div class="text-2xl font-bold text-gray-800" id="stat-comments">0</div>
                     </div>
                     <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
                         <div class="text-gray-400 mb-1 flex items-center justify-between">
-                            <span class="text-xs font-semibold uppercase tracking-wide">Atividade Física</span>
-                            <i data-lucide="footprints" class="w-4 h-4 text-teal-400"></i>
+                            <span class="text-xs font-semibold uppercase tracking-wide">Menções</span>
+                            <i data-lucide="at-sign" class="w-4 h-4 text-teal-400"></i>
                         </div>
-                        <div class="text-2xl font-bold text-gray-800" id="stat-steps">--</div>
-                    </div>
-                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                        <div class="text-gray-400 mb-1 flex items-center justify-between">
-                            <span class="text-xs font-semibold uppercase tracking-wide">Saúde Geral</span>
-                            <i data-lucide="waves" class="w-4 h-4 text-blue-400"></i>
-                        </div>
-                        <div class="text-2xl font-bold text-gray-800" id="stat-health">-- <span class="text-sm font-normal text-gray-500">%</span></div>
+                        <div class="text-2xl font-bold text-gray-800" id="stat-mentions">0</div>
                     </div>
                 </div>
             </div>
@@ -117,712 +119,124 @@
                     <h3 class="font-bold text-xl text-gray-800 display-font">Tracker IA</h3>
                 </div>
 
-                <div id="status-container" class="status-indicator">
-                    <span class="status-dot"></span> <span id="current-status">Pronto para iniciar</span>
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="status-dot status-indicator__dot inline-block w-2.5 h-2.5 bg-green-500 rounded-full"></span>
+                    <span id="current-status" class="status-indicator__text text-sm font-medium">Pronto para iniciar</span>
                 </div>
 
-                <div id="live-events" class="live-events mt-4 mb-6 max-h-40 overflow-y-auto border border-gray-100 rounded-xl p-3 bg-white/50 text-sm space-y-2">
-                    <!-- Events injected by Dashboard.js -->
+                <div id="intelligence-progress-container" class="mb-4"></div>
+
+                <div id="live-events" class="live-events mt-4 mb-6 max-h-40 overflow-y-auto border border-gray-100 rounded-xl p-3 bg-white/50 text-xs space-y-2">
                     <div class="text-gray-400 text-center italic">Aguardando eventos...</div>
                 </div>
 
-                <button id="btn-toggle-tracking" class="w-full py-2.5 px-4 rounded-xl bg-purple-50 text-purple-700 font-semibold text-sm hover:bg-purple-100 transition-colors flex items-center justify-center gap-2 group-hover:shadow-sm" disabled>
+                <button id="btn-toggle-tracking" class="w-full py-2.5 px-4 rounded-xl bg-purple-50 text-purple-700 font-semibold text-sm hover:bg-purple-100 transition-colors flex items-center justify-center gap-2 group-hover:shadow-sm">
                     <i data-lucide="play-circle" class="w-4 h-4"></i>
                     Iniciar Tracking
                 </button>
             </div>
 
-            <!-- Analysis Section (Span 3) encapsulating the original tabs logic but hidden cleanly or presented in scrolling view -->
+            <!-- Analysis Section (Span 3) -->
             <div class="glass-card md:col-span-3 p-6 mt-8">
-               <div class="flex items-center gap-3 mb-6">
-                    <div class="p-2.5 bg-coral-50 text-coral-500 rounded-xl">
-                        <i data-lucide="target" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="font-bold text-xl text-gray-800 display-font">Módulos de Inteligência Avançada</h3>
-                </div>
-
-    <!-- Main Content Bento Grid -->
-    <main class="pt-24 pb-12 px-4 md:px-8 max-w-7xl mx-auto md:ml-64 transition-all duration-300">
-        
-        <div class="mb-8 animate-fade-in-up">
-            <h2 class="text-3xl font-bold display-font mb-2">Bem-vindo(a) de volta, Admin! ✨</h2>
-            <p class="text-gray-500 text-lg">Aqui está o panorama da sua jornada de longevidade cósmica hoje.</p>
-        </div>
-
-        <!-- Bento Grid with Cosmic Visuals and integrated legacy classes -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in" style="animation-delay: 0.1s;">
-            
-            <!-- Vitais Resumo / User Profile (Span 2) -->
-            <div class="glass-card md:col-span-2 p-6 flex flex-col justify-between relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <i data-lucide="heart-pulse" class="w-32 h-32 text-teal-600"></i>
-                </div>
-                <div>
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="p-2.5 bg-teal-100 text-teal-600 rounded-xl">
-                            <i data-lucide="activity" class="w-6 h-6"></i>
+                <div class="flex flex-col md:flex-row items-center justify-between mb-8 gap-4 border-b border-gray-50 pb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 bg-coral-50 text-coral-500 rounded-xl">
+                            <i data-lucide="target" class="w-6 h-6"></i>
                         </div>
-                        <h3 class="font-bold text-xl text-gray-800 display-font">Perfil Rastreado</h3>
+                        <h3 class="font-bold text-xl text-gray-800 display-font">Inteligência Avançada</h3>
                     </div>
-                    <!-- Legacy integration point: where Dashboard.js injects user info -->
-                    <div id="profile-container" class="profile-header">
-                        <p class="text-gray-500 mb-6 text-sm">Pesquise um usuário na barra de busca para carregar as métricas do perfil.</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
-                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                        <div class="text-gray-400 mb-1 flex items-center justify-between">
-                            <span class="text-xs font-semibold uppercase tracking-wide">BPM Médio</span>
-                            <i data-lucide="heart" class="w-4 h-4 text-rose-400"></i>
-                        </div>
-                        <div class="text-2xl font-bold text-gray-800" id="stat-bpm">-- <span class="text-sm font-normal text-gray-500">bpm</span></div>
-                    </div>
-                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                        <div class="text-gray-400 mb-1 flex items-center justify-between">
-                            <span class="text-xs font-semibold uppercase tracking-wide">Qualidade do Sono</span>
-                            <i data-lucide="moon" class="w-4 h-4 text-indigo-400"></i>
-                        </div>
-                        <div class="text-2xl font-bold text-gray-800" id="stat-sleep">-- <span class="text-sm font-normal text-gray-500">h</span></div>
-                    </div>
-                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                        <div class="text-gray-400 mb-1 flex items-center justify-between">
-                            <span class="text-xs font-semibold uppercase tracking-wide">Atividade Física</span>
-                            <i data-lucide="footprints" class="w-4 h-4 text-teal-400"></i>
-                        </div>
-                        <div class="text-2xl font-bold text-gray-800" id="stat-steps">--</div>
-                    </div>
-                    <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                        <div class="text-gray-400 mb-1 flex items-center justify-between">
-                            <span class="text-xs font-semibold uppercase tracking-wide">Saúde Geral</span>
-                            <i data-lucide="waves" class="w-4 h-4 text-blue-400"></i>
-                        </div>
-                        <div class="text-2xl font-bold text-gray-800" id="stat-health">-- <span class="text-sm font-normal text-gray-500">%</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- IA Assistente / Live Tracker Status -->
-            <div class="glass-card p-6 border-l-4 border-l-purple-500 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <i data-lucide="brain" class="w-24 h-24 text-purple-600"></i>
-                </div>
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-2.5 bg-purple-100 text-purple-600 rounded-xl">
-                        <i data-lucide="sparkles" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="font-bold text-xl text-gray-800 display-font">Tracker IA</h3>
+                    <!-- Container para TabsManager.js -->
+                    <div id="tabs-container" class="w-full md:w-auto overflow-x-auto"></div>
                 </div>
                 
-                <div id="status-container" class="status-indicator">
-                    <span class="status-dot"></span> <span id="current-status">Pronto para iniciar</span>
-                </div>
-                
-                <div id="live-events" class="live-events mt-4 mb-6 max-h-40 overflow-y-auto border border-gray-100 rounded-xl p-3 bg-white/50 text-sm space-y-2">
-                    <!-- Events injected by Dashboard.js -->
-                    <div class="text-gray-400 text-center italic">Aguardando eventos...</div>
-                </div>
+                <!-- Main container para conteúdo das abas -->
+                <div id="main-content">
 
-                <button id="btn-toggle-tracking" class="w-full py-2.5 px-4 rounded-xl bg-purple-50 text-purple-700 font-semibold text-sm hover:bg-purple-100 transition-colors flex items-center justify-center gap-2 group-hover:shadow-sm" disabled>
-                    <i data-lucide="play-circle" class="w-4 h-4"></i>
-                    Iniciar Tracking
-                </button>
+                    <!-- TAB: OVERVIEW -->
+                    <div id="tab-overview" class="tab-pane active" data-tab-panel="overview">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="md:col-span-2">
+                                <div class="bg-white p-6 rounded-2xl border border-gray-100">
+                                    <h4 class="font-bold mb-4 flex items-center gap-2">
+                                        <i data-lucide="line-chart" class="text-teal-500 w-5 h-5"></i> Engajamento Temporal
+                                    </h4>
+                                    <div id="engagement-chart" class="h-64 flex items-center justify-center bg-gray-50 rounded-xl">
+                                        <p class="text-gray-400 italic">Aguardando dados...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="bg-white p-6 rounded-2xl border border-gray-100 h-full">
+                                    <h4 class="font-bold mb-4 flex items-center gap-2">
+                                        <i data-lucide="users" class="text-indigo-500 w-5 h-5"></i> Top Afinidade
+                                    </h4>
+                                    <div id="quick-top-interactions" class="space-y-4">
+                                        <p class="text-gray-400 italic text-sm">Sem interações</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB: ACTIVITIES -->
+                    <div id="tab-activities" class="tab-pane" data-tab-panel="activities">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="glass-card p-6 h-fit">
+                                <h4 class="font-bold mb-4">Configurar Rastreamento</h4>
+                                <form id="tracking-form" class="space-y-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Username Alvo</label>
+                                        <input type="text" name="username" class="w-full p-2 bg-gray-50 rounded-lg border-none focus:ring-2 focus:ring-teal-500" placeholder="ex: instagram">
+                                    </div>
+                                    <div class="pt-2">
+                                        <button type="submit" class="w-full bg-teal-600 text-white p-2.5 rounded-xl font-bold hover:bg-teal-700 transition-colors">Rastrear Agora</button>
+                                    </div>
+                                </form>
+                                <div id="affinity-widget" class="mt-8"></div>
+                            </div>
+                            <div class="md:col-span-2">
+                                <div id="activities-list" class="space-y-4">
+                                    <div class="text-center py-20 bg-gray-50 rounded-2xl">
+                                        <i data-lucide="inbox" class="w-12 h-12 text-gray-300 mx-auto mb-2"></i>
+                                        <p class="text-gray-400">Nenhuma atividade registrada.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB: INTELLIGENCE -->
+                    <div id="tab-intelligence" class="tab-pane" data-tab-panel="intelligence">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div id="sentiment-widget"></div>
+                            <div id="predictive-widget"></div>
+                            <div id="vision-widget" class="md:col-span-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- TAB: NETWORK -->
+                    <div id="tab-network" class="tab-pane" data-tab-panel="network">
+                        <div id="network-graph" class="w-full h-[600px] bg-gray-900 rounded-2xl overflow-hidden flex items-center justify-center">
+                            <p class="text-gray-500 italic">O grafo de conexões será renderizado aqui.</p>
+                        </div>
+                    </div>
+
+                    <!-- TAB: OSINT -->
+                    <div id="tab-osint" class="tab-pane" data-tab-panel="osint">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div id="platform-results"></div>
+                            <div id="breach-results"></div>
+                        </div>
+                    </div>
+
+                    <!-- TAB: HISTORY -->
+                    <div id="tab-history" class="tab-pane" data-tab-panel="history">
+                        <div id="calendar-view" class="w-full h-[400px] bg-white rounded-2xl border border-gray-100 flex items-center justify-center"></div>
+                        <div id="location-map" class="mt-6 h-[400px] bg-white rounded-2xl border border-gray-100"></div>
+                    </div>
+
+                </div>
             </div>
-            
-            <!-- Analysis Section (Span 3) encapsulating the original tabs logic but hidden cleanly or presented in scrolling view -->
-            <div class="glass-card md:col-span-3 p-6 mt-8">
-               <div class="flex items-center gap-3 mb-6">
-                    <div class="p-2.5 bg-coral-50 text-coral-500 rounded-xl">
-                        <i data-lucide="target" class="w-6 h-6"></i>
-                    </div>
-                    <h3 class="font-bold text-xl text-gray-800 display-font">Módulos de Inteligência Avançada</h3>
-                </div>
-                
-                <!-- ORIGINAL TABS & WIDGETS WRAPPED -->
-                <main class="main-content">
-        <header class="top-bar">
-          <div class="top-bar__search">
-            <i class="fas fa-search"></i>
-            <input
-              type="text"
-              id="global-search"
-              placeholder="Buscar em toda a inteligência..."
-            />
-          </div>
-          <div class="top-bar__actions">
-            <button class="action-btn" title="Notificações">
-              <i class="fas fa-bell"></i>
-              <span class="badge">3</span>
-            </button>
-            <button class="action-btn" title="Configurações">
-              <i class="fas fa-cog"></i>
-            </button>
-          </div>
-        </header>
-
-        <div class="content-wrapper">
-          <div id="dashboard-content" class="tab-content">
-            <!-- ========================================= -->
-            <!-- TAB: DASHBOARD (Visão Geral) -->
-            <!-- ========================================= -->
-            <div id="tab-dashboard" class="tab-pane active">
-              <div class="dashboard-grid">
-                <!-- Profile Card -->
-                <div class="grid-col-4">
-                  <div id="profile-card-container">
-                    <div class="widget profile-placeholder">
-                      <div class="placeholder-avatar"></div>
-                      <div class="placeholder-lines">
-                        <div class="line"></div>
-                        <div class="line short"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Stats Overview -->
-                <div class="grid-col-8">
-                  <div class="stats-row">
-                    <div class="stat-card">
-                      <div class="stat-icon"><i class="fas fa-heart"></i></div>
-                      <div class="stat-info">
-                        <span class="stat-label">Total Likes</span>
-                        <span class="stat-value" id="stat-likes">0</span>
-                      </div>
-                    </div>
-                    <div class="stat-card">
-                      <div class="stat-icon">
-                        <i class="fas fa-comment"></i>
-                      </div>
-                      <div class="stat-info">
-                        <span class="stat-label">Comentários</span>
-                        <span class="stat-value" id="stat-comments">0</span>
-                      </div>
-                    </div>
-                    <div class="stat-card">
-                      <div class="stat-icon"><i class="fas fa-at"></i></div>
-                      <div class="stat-info">
-                        <span class="stat-label">Menções</span>
-                        <span class="stat-value" id="stat-mentions">0</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="widget engagement-widget">
-                    <div class="widget__header">
-                      <h3 class="widget__title">
-                        <i class="fas fa-chart-area"></i> Velocidade de
-                        Interação
-                      </h3>
-                    </div>
-                    <div
-                      id="engagement-chart-container"
-                      class="chart-container"
-                    >
-                      <p
-                        style="
-                          color: #666;
-                          text-align: center;
-                          padding-top: 50px;
-                        "
-                      >
-                        Aguardando dados de rastreamento...
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Secondary Row -->
-                <div class="grid-col-4">
-                  <div class="widget">
-                    <div class="widget__header">
-                      <h3 class="widget__title">
-                        <i class="fas fa-history"></i> Atividades Recentes
-                      </h3>
-                    </div>
-                    <div id="quick-activity-feed">
-                      <p style="color: #666">
-                        Faça uma análise para ver as estatísticas
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="grid-col-4">
-                  <div class="widget">
-                    <div class="widget__header">
-                      <h3 class="widget__title">
-                        <i class="fas fa-smile"></i> Sentimento
-                      </h3>
-                    </div>
-                    <div id="quick-sentiment-preview">
-                      <p style="color: #666">
-                        Análise de sentimento não disponível
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="grid-col-4">
-                  <div class="widget">
-                    <div class="widget__header">
-                      <h3 class="widget__title">
-                        <i class="fas fa-users"></i> Top Interações
-                      </h3>
-                    </div>
-                    <div id="quick-top-interactions">
-                      <p style="color: #666">Sem dados de interações</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- ========================================= -->
-            <!-- TAB: TRACKING (Formulário de Rastreamento) -->
-            <!-- ========================================= -->
-            <div id="tab-tracking" class="tab-pane">
-              <section class="tracking-panel">
-                <div class="panel-header">
-                  <i class="fas fa-search"></i>
-                  <h2>Rastreamento de Atividades</h2>
-                </div>
-                <p class="panel-description">
-                  Rastreie <strong>atividades que uma pessoa FEZ</strong> no
-                  Instagram: curtidas e comentários dados para outros usuários
-                </p>
-
-                <div
-                  id="intelligence-progress-container"
-                  class="intelligence-progress-container"
-                ></div>
-
-                <form id="tracking-form" class="tracking-form">
-                  <div class="form-group">
-                    <label for="targetUsername">
-                      <i class="fas fa-user"></i>
-                      Usuário para Rastrear
-                    </label>
-                    <input
-                      type="text"
-                      id="targetUsername"
-                      name="username"
-                      placeholder="usuario_para_rastrear"
-                      required
-                    />
-                    <small>Digite o nome de usuário do Instagram (sem @)</small>
-                  </div>
-
-                  <div class="form-section optional-section">
-                    <h3>
-                      <i class="fas fa-key"></i>
-                      Login Opcional (Para Mais Dados)
-                    </h3>
-                    <p class="section-description">
-                      <strong>Completamente opcional!</strong> Forneça suas
-                      credenciais para obter mais dados detalhados. <br /><span
-                        class="highlight"
-                        >A ferramenta funciona 100% sem login.</span
-                      >
-                    </p>
-
-                    <div class="form-row">
-                      <div class="form-group">
-                        <label for="loginUsername">
-                          <i class="fas fa-user-circle"></i>
-                          Seu Usuário Instagram
-                        </label>
-                        <input
-                          type="text"
-                          id="loginUsername"
-                          name="login_username"
-                          placeholder="seu_usuario (opcional)"
-                        />
-                      </div>
-                      <div class="form-group">
-                        <label for="loginPassword">
-                          <i class="fas fa-lock"></i>
-                          Sua Senha
-                        </label>
-                        <input
-                          type="password"
-                          id="loginPassword"
-                          name="login_password"
-                          placeholder="sua_senha (opcional)"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="form-section advanced-section">
-                    <h3>
-                      <i class="fas fa-cogs"></i>
-                      Configurações Avançadas
-                    </h3>
-
-                    <div class="form-row">
-                      <div class="form-group">
-                        <label for="maxFollowing">
-                          <i class="fas fa-users"></i>
-                          Máximo de Perfis a Analisar
-                        </label>
-                        <input
-                          type="number"
-                          id="maxFollowing"
-                          name="max_following"
-                          value="20"
-                          min="1"
-                          max="100"
-                        />
-                        <small
-                          >Mais perfis = mais dados, mas demora mais
-                          tempo</small
-                        >
-                      </div>
-
-                      <div class="form-group">
-                        <label for="ignoredUsers">
-                          <i class="fas fa-user-slash"></i>
-                          Usuários a Ignorar
-                        </label>
-                        <input
-                          type="text"
-                          id="ignoredUsers"
-                          name="ignored_users"
-                          placeholder="usuario1, usuario2"
-                        />
-                        <small>Separe por vírgula</small>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="form-actions">
-                    <button type="submit" id="trackBtn" class="btn btn-primary">
-                      <i class="fas fa-play"></i>
-                      Iniciar Rastreamento
-                    </button>
-                    <button type="reset" class="btn btn-secondary">
-                      <i class="fas fa-undo"></i>
-                      Limpar
-                    </button>
-                  </div>
-                </form>
-              </section>
-            </div>
-
-            <!-- ========================================= -->
-            <!-- TAB: ACTIVITIES -->
-            <!-- ========================================= -->
-            <div id="tab-activities" class="tab-pane">
-              <div class="widget">
-                <div class="widget__header">
-                  <h3 class="widget__title">
-                    <i class="fas fa-heart"></i> Atividades Rastreadas
-                  </h3>
-                  <div class="widget__actions">
-                    <div class="export-menu">
-                      <button class="widget__action-btn" title="Exportar">
-                        <i class="fas fa-download"></i>
-                      </button>
-                      <div class="export-dropdown">
-                        <button
-                          class="export-option"
-                          onclick="exportData('json')"
-                        >
-                          <i class="fas fa-file-code"></i> JSON
-                        </button>
-                        <button
-                          class="export-option"
-                          onclick="exportData('csv')"
-                        >
-                          <i class="fas fa-file-csv"></i> CSV
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Stats -->
-                <div id="activity-stats"></div>
-
-                <!-- Top Interactors (Affinity) -->
-                <div
-                  id="affinity-widget"
-                  class="affinity-widget-container"
-                ></div>
-
-                <!-- Filtros -->
-                <div class="tabs" style="margin: var(--spacing-lg) 0">
-                  <button class="tab-btn active" data-filter="all">
-                    <i class="fas fa-list"></i> Todas
-                  </button>
-                  <button class="tab-btn" data-filter="like">
-                    <i class="fas fa-heart"></i> Curtidas
-                  </button>
-                  <button class="tab-btn" data-filter="comment">
-                    <i class="fas fa-comment"></i> Comentários
-                  </button>
-                  <button class="tab-btn" data-filter="mention">
-                    <i class="fas fa-at"></i> Menções
-                  </button>
-                </div>
-
-                <!-- Lista de Atividades -->
-                <div id="activities-list" class="activities-list">
-                  <div class="empty-state">
-                    <i
-                      class="fas fa-inbox"
-                      style="font-size: 3rem; color: #ccc"
-                    ></i>
-                    <p>Faça um rastreamento para ver as atividades</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- ========================================= -->
-            <!-- TAB: SENTIMENT -->
-            <!-- ========================================= -->
-            <div id="tab-sentiment" class="tab-pane">
-              <div id="sentiment-widget">
-                <div class="widget sentiment-widget">
-                  <div class="widget__header">
-                    <h3 class="widget__title">
-                      <i class="fas fa-smile"></i> Análise de Sentimento
-                    </h3>
-                    <button
-                      class="btn btn-primary btn-small"
-                      onclick="loadSentimentAnalysis()"
-                    >
-                      <i class="fas fa-sync"></i> Analisar
-                    </button>
-                  </div>
-                  <p
-                    style="
-                      color: #666;
-                      text-align: center;
-                      padding: var(--spacing-xl);
-                    "
-                  >
-                    Selecione um perfil e clique em "Analisar" para ver a
-                    análise de sentimento
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- ========================================= -->
-            <!-- TAB: PREDICTIVE -->
-            <!-- ========================================= -->
-            <div id="tab-predictive" class="tab-pane">
-              <div id="predictive-widget">
-                <div class="widget predictive-widget">
-                  <div class="widget__header">
-                    <h3 class="widget__title">
-                      <i class="fas fa-chart-line"></i> Análise Preditiva
-                    </h3>
-                    <button
-                      class="btn btn-primary btn-small"
-                      onclick="loadPredictiveAnalysis()"
-                    >
-                      <i class="fas fa-sync"></i> Analisar
-                    </button>
-                  </div>
-                  <p
-                    style="
-                      color: #666;
-                      text-align: center;
-                      padding: var(--spacing-xl);
-                    "
-                  >
-                    Análise de padrões comportamentais e previsão de atividade
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- ========================================= -->
-            <!-- TAB: VISION -->
-            <!-- ========================================= -->
-            <div id="tab-vision" class="tab-pane">
-              <div id="vision-widget">
-                <div class="widget vision-widget">
-                  <div class="widget__header">
-                    <h3 class="widget__title">
-                      <i class="fas fa-eye"></i> Visão Computacional
-                    </h3>
-                    <button
-                      class="btn btn-primary btn-small"
-                      onclick="loadVisualAnalysis()"
-                    >
-                      <i class="fas fa-sync"></i> Analisar Imagens
-                    </button>
-                  </div>
-                  <p
-                    style="
-                      color: #666;
-                      text-align: center;
-                      padding: var(--spacing-xl);
-                    "
-                  >
-                    Análise de imagens do perfil com YOLOv8
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- ========================================= -->
-            <!-- TAB: NETWORK -->
-            <!-- ========================================= -->
-            <div id="tab-network" class="tab-pane">
-              <div class="widget network-widget">
-                <div class="widget__header">
-                  <h3 class="widget__title">
-                    <i class="fas fa-project-diagram"></i> Grafo de Rede Social
-                  </h3>
-                </div>
-                <div class="network-container" id="network-graph">
-                  <p
-                    style="color: #fff; text-align: center; padding-top: 200px"
-                  >
-                    Grafo de rede será exibido aqui após análise
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- ========================================= -->
-            <!-- TAB: LOCATIONS -->
-            <!-- ========================================= -->
-            <div id="tab-locations" class="tab-pane">
-              <div class="widget">
-                <div class="widget__header">
-                  <h3 class="widget__title">
-                    <i class="fas fa-map-marker-alt"></i> Mapa de Localizações
-                  </h3>
-                </div>
-                <div id="location-map" style="height: 500px; width: 100%">
-                  <p
-                    style="
-                      color: #666;
-                      text-align: center;
-                      padding-top: 200px;
-                    "
-                  >
-                    Mapa de calor será exibido aqui
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- ========================================= -->
-            <!-- TAB: TOP INTERACTIONS -->
-            <!-- ========================================= -->
-            <div id="tab-top-interactions" class="tab-pane">
-              <div class="dashboard-grid">
-                <div class="grid-col-6">
-                  <div class="widget" id="top-outgoing-widget">
-                    <div class="widget__header">
-                      <h3 class="widget__title">
-                        <i class="fas fa-arrow-up"></i> Top Interações (Saída)
-                      </h3>
-                    </div>
-                    <div class="list-container">
-                      <p style="color: #666; padding: 20px">
-                        Aguardando dados...
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="grid-col-6">
-                  <div class="widget" id="top-incoming-widget">
-                    <div class="widget__header">
-                      <h3 class="widget__title">
-                        <i class="fas fa-arrow-down"></i> Top Interações
-                        (Entrada)
-                      </h3>
-                    </div>
-                    <div class="list-container">
-                      <p style="color: #666; padding: 20px">
-                        Aguardando dados...
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- ========================================= -->
-            <!-- TAB: OSINT -->
-            <!-- ========================================= -->
-            <div id="tab-osint" class="tab-pane">
-              <div class="widget">
-                <div class="widget__header">
-                  <h3 class="widget__title">
-                    <i class="fas fa-search-plus"></i> OSINT Cross-Platform
-                  </h3>
-                </div>
-                <div id="platform-results">
-                  <p style="color: #666; text-align: center; padding: 50px">
-                    Ferramentas de investigação OSINT
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- ========================================= -->
-            <!-- TAB: BREACH -->
-            <!-- ========================================= -->
-            <div id="tab-breach" class="tab-pane">
-              <div class="widget">
-                <div class="widget__header">
-                  <h3 class="widget__title">
-                    <i class="fas fa-shield-alt"></i> Verificação de Vazamentos
-                  </h3>
-                </div>
-                <div id="breach-results">
-                  <p style="color: #666; text-align: center; padding: 50px">
-                    Verificador de vazamento de dados
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- ========================================= -->
-            <!-- TAB: CHAT -->
-            <!-- ========================================= -->
-            <div id="tab-chat" class="tab-pane">
-              <div class="widget" style="height: calc(100vh - 200px)">
-                <div class="widget__header">
-                  <h3 class="widget__title">
-                    <i class="fas fa-comments"></i> Chat & Notas
-                  </h3>
-                </div>
-                <div id="chat-widget-container" style="height: 100%">
-                  <p style="color: #666; text-align: center; padding: 50px">
-                    Sistema de anotações e chat
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- ========================================= -->
-            <!-- TAB: AI SETTINGS -->
-            <!-- ========================================= -->
-            <div id="tab-ai-settings" class="tab-pane">
-              <div class="widget">
-                <div class="widget__header">
-                  <h3 class="widget__title">
-                    <i class="fas fa-robot"></i> Configurações de IA
-                  </h3>
-                </div>
-                <div class="settings-form">
-                  <p style="color: #666; padding: 20px">
-                    Configurações dos modelos de IA e chaves de API
-                  </p>
-                </div>
-              </div>
-            </div>
-            </div>
-
         </div>
     </main>
 

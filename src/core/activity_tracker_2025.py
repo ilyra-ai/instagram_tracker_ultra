@@ -266,7 +266,7 @@ class ActivityTracker2025:
             return self.activities
         
         finally:
-            await self.cleanup()
+            await self.cleanup_async()
 
     async def _extract_post_interactors(self, post: Dict[str, Any]) -> Set[str]:
         """
@@ -857,15 +857,16 @@ class ActivityTracker2025:
         sorted_ranking = sorted(ranking.values(), key=lambda x: x['score'], reverse=True)
         return sorted_ranking
 
-    async def cleanup(self) -> None:
-        """Limpa recursos e fecha conexões"""
+    def cleanup(self) -> None:
+        """Limpa recursos de forma síncrona/segura"""
+        self.scraper.cleanup()
+
+    async def cleanup_async(self) -> None:
+        """Limpa recursos e fecha conexões (Assíncrono)"""
         try:
             await self.scraper.cleanup_async()
-            # Limpar caches se necessário
-            # self._likers_cache.clear()
-            # self._commenters_cache.clear()
         except Exception as e:
-            self.logger.error(f"Erro na limpeza: {e}")
+            self.logger.error(f"Erro na limpeza assíncrona: {e}")
 
     async def track_user_locations(self, target_username: str, limit: int = 50) -> List[Dict[str, Any]]:
         """

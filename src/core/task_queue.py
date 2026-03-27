@@ -452,7 +452,7 @@ async def handler_scrape_profile(task_info: TaskInfo) -> Dict:
         result = await scraper.self_healing.get_profile(username)
         return result.data if result.success else {'error': result.error}
     finally:
-        scraper.cleanup()
+        await scraper.cleanup_async()
 
 
 async def handler_track_activities(task_info: TaskInfo) -> Dict:
@@ -487,7 +487,7 @@ async def handler_track_activities(task_info: TaskInfo) -> Dict:
             'affinity_ranking': affinity_ranking
         }
     finally:
-        tracker.cleanup()
+        await tracker.cleanup_async()
 
 
 # =============================================================================

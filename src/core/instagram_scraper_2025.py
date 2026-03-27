@@ -699,9 +699,9 @@ class InstagramScraper2025:
             print(f"Erro DB: {e}")
 
     def initialize_browser(self):
-        """Inicializa o NodriverManager se necessário"""
+        """Inicializa o BrowserManager se necessário"""
         if not self.browser_manager:
-            self.browser_manager = NodriverManager(headless=self.headless)
+            self.browser_manager = BrowserManager(headless=self.headless)
             return True
         return True
 
@@ -957,11 +957,23 @@ class InstagramScraper2025:
             return None
 
     def cleanup(self):
-        """Limpa recursos (Wrapper síncrono)"""
+        """
+        Limpa recursos de forma segura, detectando se já existe um loop rodando.
+        """
+        try:
+            loop = asyncio.get_running_loop()
+            if loop.is_running():
+                # Se o loop está rodando, agendamos a limpeza como uma tarefa
+                loop.create_task(self.cleanup_async())
+                return
+        except RuntimeError:
+            # Nenhum loop rodando, podemos usar asyncio.run
+            pass
+
         try:
             asyncio.run(self.cleanup_async())
         except Exception as e:
-            self.logger.error(f"Erro na limpeza: {e}")
+            self.logger.error(f"Erro na limpeza síncrona: {e}")
 
     async def cleanup_async(self):
         """Limpa recursos (Versão assíncrona)"""
