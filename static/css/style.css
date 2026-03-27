@@ -109,3 +109,123 @@ h1, h2, h3, h4, h5, h6, .display-font {
 .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
 .animate-fade-in-up { animation: fadeInUp 0.4s ease-out forwards; }
 .animate-float { animation: float 3s ease-in-out infinite; }
+
+/* Tabs System */
+.tab-pane, [data-tab-panel] {
+    display: none;
+    width: 100%;
+}
+
+.tab-pane.active, .tab-panel--active {
+    display: block;
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* Tabs Bar Styling */
+.tabs-bar {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.25rem;
+    background: #F1F5F9;
+    border-radius: 12px;
+}
+
+.tab {
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #64748B;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tab--active {
+    background: white;
+    color: #0D9488;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Custom Components */
+.premium-item {
+    transition: all 0.2s;
+}
+.premium-item:hover {
+    background: #F8FAFC;
+    transform: translateX(4px);
+}
+
+/* Tabs Mobile & Dropdown Support */
+.tabs-mobile {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .tabs-bar { display: none; }
+    .tabs-mobile { display: block; position: relative; }
+
+    .tabs-mobile__trigger {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        background: #F1F5F9;
+        border-radius: 10px;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .tabs-mobile__dropdown {
+        display: none;
+        position: absolute;
+        top: 110%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        z-index: 50;
+        padding: 0.5rem;
+    }
+
+    .tabs-mobile__dropdown--open {
+        display: block;
+        animation: fadeInUp 0.2s ease-out;
+    }
+
+    .tabs-mobile__item {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.75rem;
+        border-radius: 8px;
+        text-align: left;
+    }
+
+    .tabs-mobile__item--active {
+        background: #F0FDFA;
+        color: #0D9488;
+    }
+
+    .tabs-mobile__desc {
+        font-size: 0.75rem;
+        color: #64748B;
+    }
+}
+
+/* Status Dot Animation */
+.status-indicator__dot--online { background-color: #10B981; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
+.status-indicator__dot--offline { background-color: #EF4444; }
+
+/* Dashboard Widgets */
+.activity-card {
+    border-left: 4px solid transparent;
+}
+.activity-card.like { border-left-color: #F43F5E; }
+.activity-card.comment { border-left-color: #0EA5E9; }
+.activity-card.mention { border-left-color: #10B981; }

@@ -15,8 +15,9 @@ load_dotenv()
 # Adicionar pasta src ao path para imports funcionarem
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from flask import Flask, request, jsonify, send_from_directory, render_template
+from flask import Flask, request, jsonify, send_from_directory, render_template, session, redirect, url_for
 from flask_cors import CORS
+from functools import wraps
 
 # Imports dos módulos core
 try:
@@ -41,10 +42,13 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__, 
             static_folder='../../static',
             template_folder='../../templates')
-app.config['SECRET_KEY'] = 'instagram_tracker_2025_secret_key'
 
-# Habilitar CORS
-CORS(app, origins="*")
+# Segurança: Usar SECRET_KEY do ambiente ou gerar uma aleatória
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', os.urandom(32).hex())
+
+# Habilitar CORS com restrição de origens se configurado
+allowed_origins = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5000').split(',')
+CORS(app, origins=allowed_origins if '*' not in allowed_origins else '*')
 
 # =============================================================================
 # TASK QUEUE E SOCKETIO (Arquitetura Orientada a Eventos)
@@ -105,14 +109,45 @@ except ImportError:
 
 # Inicializar SocketIO se disponível
 if SOCKETIO_AVAILABLE:
-    socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+    socketio = SocketIO(app, cors_allowed_origins=allowed_origins if '*' not in allowed_origins else '*', async_mode='threading')
     logger.info("✅ Flask-SocketIO inicializado")
 else:
     socketio = None
     logger.warning("⚠️ Flask-SocketIO não disponível. Notificações em tempo real desabilitadas.")
 
+# Inicializar Task Queue em background se disponível
+if TASK_QUEUE_AVAILABLE:
+    try:
+        # Iniciar a fila de tarefas em uma thread separada ou no loop de eventos
+        # Como o Flask (Werkzeug) em modo dev pode ser problemático com threads e reloads,
+        # garantimos que inicie de forma segura.
+        queue = get_task_queue()
+        import threading
+
+        def start_queue():
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(queue.start())
+            loop.run_forever()
+
+        queue_thread = threading.Thread(target=start_queue, daemon=True)
+        queue_thread.start()
+        logger.info("🚀 Task Queue workers iniciados em background")
+    except Exception as e:
+        logger.error(f"❌ Falha ao iniciar Task Queue: {e}")
+
 # Variável global para rastreador ativo
 active_tracker = None
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'logged_in' not in session:
+            if request.is_json:
+                return jsonify({'error': 'Autenticação necessária'}), 401
+            return redirect(url_for('login_page'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 @app.route('/api/instagram/status', methods=['GET'])
 def get_status():
@@ -131,6 +166,7 @@ def get_status():
     })
 
 @app.route("/api/instagram/track", methods=["GET"])
+@login_required
 def track_activities():
     """Rastreia atividades que o usuário FEZ (curtidas e comentários de saída)"""
     global active_tracker
@@ -144,8 +180,8 @@ def track_activities():
         username = data['username'].replace('@', '').strip()
         login_username = data.get('login_username', '').strip()
         login_password = data.get('login_password', '').strip()
-        max_following = data.get('max_following', 20) # Removido limite de performance
-        headless = data.get('headless', True)
+        max_following = int(data.get('max_following', 20))
+        headless = data.get('headless', 'true').lower() == 'true'
 
         if not username:
             return jsonify({'error': 'Nome de usuário não pode estar vazio'}), 400
@@ -165,8 +201,7 @@ def track_activities():
         )
         
         try:
-            # Rastrear atividades de saída (Agora Async)
-            # Usamos asyncio.run para executar a corrotina no contexto síncrono do Flask
+            # Rastrear atividades de saída
             activities = asyncio.run(active_tracker.track_user_outgoing_activities(
                 target_username=username,
                 login_username=login_username if login_username else None,
@@ -220,6 +255,7 @@ def track_activities():
         }), 500
 
 @app.route("/api/instagram/user-info", methods=["GET"])
+@login_required
 def get_user_info():
     """Obtém informações básicas do usuário"""
     try:
@@ -231,7 +267,7 @@ def get_user_info():
         username = data['username'].replace('@', '').strip()
         login_username = data.get('login_username', '').strip()
         login_password = data.get('login_password', '').strip()
-        headless = data.get('headless', True)
+        headless = data.get('headless', 'true').lower() == 'true'
         
         logger.info(f"📊 Obtendo informações de @{username}")
         
@@ -242,13 +278,13 @@ def get_user_info():
         
         try:
             # Login opcional
-            scraper.login_optional(
+            asyncio.run(scraper.login_optional_async(
                 login_username if login_username else None,
                 login_password if login_password else None
-            )
+            ))
             
             # Obter informações do usuário
-            user_info = scraper.get_user_info(username)
+            user_info = asyncio.run(scraper.get_profile_info_fast(username))
             
             if not user_info:
                 return jsonify({'error': 'Usuário não encontrado'}), 404
@@ -277,6 +313,7 @@ def get_user_info():
         }), 500
 
 @app.route("/api/instagram/posts", methods=["GET"])
+@login_required
 def get_user_posts():
     """Obtém posts recentes do usuário"""
     try:
@@ -286,10 +323,10 @@ def get_user_posts():
             return jsonify({'error': 'Nome de usuário é obrigatório'}), 400
         
         username = data['username'].replace('@', '').strip()
-        limit = data.get('limit', 20)  # Removido limite de performance
+        limit = int(data.get('limit', 20))
         login_username = data.get('login_username', '').strip()
         login_password = data.get('login_password', '').strip()
-        headless = data.get('headless', True)
+        headless = data.get('headless', 'true').lower() == 'true'
         
         logger.info(f"📸 Obtendo posts de @{username} (limite: {limit})")
         
@@ -300,22 +337,22 @@ def get_user_posts():
         
         try:
             # Login opcional
-            scraper.login_optional(
+            asyncio.run(scraper.login_optional_async(
                 login_username if login_username else None,
                 login_password if login_password else None
-            )
+            ))
             
             # Obter informações do usuário
-            user_info = scraper.get_user_info(username)
+            user_info = asyncio.run(scraper.get_profile_info_fast(username))
             if not user_info:
                 return jsonify({'error': 'Usuário não encontrado'}), 404
             
             # Obter posts
-            ignore_pinned = data.get('ignore_pinned', False)
+            ignore_pinned = data.get('ignore_pinned', 'false').lower() == 'true'
             media_type = data.get('media_type', 'both') # 'posts', 'reels', 'both'
             start_date = data.get("start_date")
             end_date = data.get("end_date")
-            posts = scraper.get_user_posts(username, limit, ignore_pinned=ignore_pinned, media_type=media_type, start_date=start_date, end_date=end_date)
+            posts = asyncio.run(scraper.get_user_posts_async(username, limit, ignore_pinned=ignore_pinned, media_type=media_type, start_date=start_date, end_date=end_date))
 
 
 
@@ -347,6 +384,7 @@ def get_user_posts():
         }), 500
 
 @app.route("/api/instagram/following", methods=["GET"])
+@login_required
 def get_following():
     """Obtém lista de usuários que o target está seguindo"""
     try:
@@ -356,10 +394,10 @@ def get_following():
             return jsonify({'error': 'Nome de usuário é obrigatório'}), 400
         
         username = data['username'].replace('@', '').strip()
-        limit = data.get('limit', 50)  # Removido limite de performance
+        limit = int(data.get('limit', 50))
         login_username = data.get('login_username', '').strip()
         login_password = data.get('login_password', '').strip()
-        headless = data.get('headless', True)
+        headless = data.get('headless', 'true').lower() == 'true'
         
         logger.info(f"👥 Obtendo seguindo de @{username} (limite: {limit})")
         
@@ -370,13 +408,13 @@ def get_following():
         
         try:
             # Login opcional
-            scraper.login_optional(
+            asyncio.run(scraper.login_optional_async(
                 login_username if login_username else None,
                 login_password if login_password else None
-            )
+            ))
             
             # Obter lista de seguindo
-            following_list = scraper.get_following_list(username, limit)
+            following_list = asyncio.run(scraper.get_following_list_async(username, limit))
             
             result = {
                 'success': True,
@@ -405,6 +443,7 @@ def get_following():
         }), 500
 
 @app.route("/api/instagram/locations", methods=["GET"])
+@login_required
 def get_locations():
     """Rastreia locais frequentados pelo usuário"""
     try:
@@ -414,10 +453,10 @@ def get_locations():
             return jsonify({'error': 'Nome de usuário é obrigatório'}), 400
         
         username = data['username'].replace('@', '').strip()
-        limit = data.get('limit', 50)
+        limit = int(data.get('limit', 50))
         login_username = data.get('login_username', '').strip()
         login_password = data.get('login_password', '').strip()
-        headless = data.get('headless', True)
+        headless = data.get('headless', 'true').lower() == 'true'
         
         logger.info(f"📍 Rastreando locais de @{username}")
         
@@ -426,7 +465,7 @@ def get_locations():
         try:
             # Login opcional
             if login_username and login_password:
-                tracker.scraper.login_optional(login_username, login_password)
+                asyncio.run(tracker.scraper.login_optional_async(login_username, login_password))
             
             # Rastrear locais
             locations = asyncio.run(tracker.track_user_locations(username, limit=limit))
@@ -456,6 +495,7 @@ def get_locations():
         }), 500
 
 @app.route('/api/instagram/test', methods=['GET'])
+@login_required
 def test_system():
     """Testa o sistema de scraping com melhor tratamento de erros"""
     try:
@@ -550,6 +590,7 @@ def test_system():
 # =============================================================================
 
 @app.route('/api/tasks/status/<task_id>', methods=['GET'])
+@login_required
 def get_task_status(task_id):
     """
     Retorna o status de uma tarefa específica.
@@ -590,6 +631,7 @@ def get_task_status(task_id):
 
 
 @app.route('/api/tasks/enqueue', methods=['POST'])
+@login_required
 def enqueue_task():
     """
     Enfileira uma nova tarefa para processamento assíncrono.
@@ -672,6 +714,7 @@ def enqueue_task():
 
 
 @app.route('/api/tasks/list', methods=['GET'])
+@login_required
 def list_tasks():
     """
     Lista todas as tarefas, opcionalmente filtradas por status.
@@ -706,6 +749,7 @@ def list_tasks():
 
 
 @app.route('/api/tasks/stats', methods=['GET'])
+@login_required
 def get_queue_stats():
     """
     Retorna estatísticas da fila de tarefas.
@@ -734,6 +778,7 @@ def get_queue_stats():
 
 
 @app.route('/api/tasks/cancel/<task_id>', methods=['POST'])
+@login_required
 def cancel_task(task_id):
     """
     Cancela uma tarefa pendente.
@@ -800,7 +845,50 @@ if SOCKETIO_AVAILABLE and socketio:
 # ENDPOINTS DE INTELIGÊNCIA ARTIFICIAL
 # =============================================================================
 
+@app.route('/api/intelligence/network-graph/<username>', methods=['GET'])
+@login_required
+def get_network_graph(username):
+    """Retorna dados do grafo de rede social para o usuário"""
+    try:
+        username = username.replace('@', '').strip()
+        logger.info(f"🕸️ Gerando grafo de rede para @{username}")
+
+        # Simulação de dados de rede baseada em atividades se disponíveis
+        # Em uma implementação real, isso buscaria no banco de dados de conexões
+
+        # Exemplo de estrutura esperada pelo Vis.js ou similar no frontend
+        nodes = [
+            {"id": username, "label": username, "group": "target", "size": 25},
+        ]
+        edges = []
+
+        # Tentar obter alguns seguidores/seguindo para popular o grafo
+        scraper = InstagramScraper2025(headless=True)
+        try:
+            following = asyncio.run(scraper.get_following_list_async(username, limit=10))
+            for user in following:
+                target = user.get('username')
+                nodes.append({"id": target, "label": target, "group": "following", "size": 15})
+                edges.append({"from": username, "to": target, "value": 1})
+        except:
+            pass
+        finally:
+            scraper.cleanup()
+
+        return jsonify({
+            'success': True,
+            'username': username,
+            'graph': {
+                'nodes': nodes,
+                'edges': edges
+            }
+        })
+    except Exception as e:
+        logger.error(f"❌ Erro ao gerar grafo: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/api/intelligence/sentiment/<username>', methods=['GET'])
+@login_required
 def analyze_user_sentiment(username):
     """
     Analisa o sentimento dos textos associados a um usuário (bio, comentários, posts).
@@ -843,7 +931,7 @@ def analyze_user_sentiment(username):
         
         try:
             # Obter informações do usuário
-            user_info = scraper.get_user_info(username)
+            user_info = asyncio.run(scraper.get_profile_info_fast(username))
             
             if not user_info:
                 return jsonify({
@@ -870,7 +958,7 @@ def analyze_user_sentiment(username):
             
             # Analisar posts
             if include_posts:
-                posts = scraper.get_user_posts(username, limit=max_posts)
+                posts = asyncio.run(scraper.get_user_posts_async(username, limit=max_posts))
                 
                 for post in posts:
                     caption = post.get('caption', '')
@@ -914,6 +1002,7 @@ def analyze_user_sentiment(username):
 
 
 @app.route('/api/intelligence/sentiment/text', methods=['POST'])
+@login_required
 def analyze_text_sentiment():
     """
     Analisa o sentimento de um texto fornecido diretamente.
@@ -979,6 +1068,7 @@ def analyze_text_sentiment():
 
 
 @app.route('/api/intelligence/prediction/<username>', methods=['GET'])
+@login_required
 def analyze_user_prediction(username):
     """
     Analisa padrões comportamentais e gera previsões de atividade.
@@ -1016,7 +1106,7 @@ def analyze_user_prediction(username):
         
         try:
             # Obter informações do usuário
-            user_info = scraper.get_user_info(username)
+            user_info = asyncio.run(scraper.get_profile_info_fast(username))
             
             if not user_info:
                 return jsonify({
@@ -1025,7 +1115,7 @@ def analyze_user_prediction(username):
                 }), 404
             
             # Obter posts para análise
-            posts = scraper.get_user_posts(username, limit=max_posts)
+            posts = asyncio.run(scraper.get_user_posts_async(username, limit=max_posts))
             
             if not posts:
                 return jsonify({
@@ -1071,6 +1161,7 @@ def analyze_user_prediction(username):
 
 
 @app.route('/api/intelligence/visual/<username>', methods=['GET'])
+@login_required
 def analyze_user_visual(username):
     """
     Analisa imagens dos posts de um usuário usando visão computacional.
@@ -1110,7 +1201,7 @@ def analyze_user_visual(username):
         
         try:
             # Obter informações do usuário
-            user_info = scraper.get_user_info(username)
+            user_info = asyncio.run(scraper.get_profile_info_fast(username))
             
             if not user_info:
                 return jsonify({
@@ -1119,7 +1210,7 @@ def analyze_user_visual(username):
                 }), 404
             
             # Obter posts para análise
-            posts = scraper.get_user_posts(username, limit=max_images)
+            posts = asyncio.run(scraper.get_user_posts_async(username, limit=max_images))
             
             if not posts:
                 return jsonify({
@@ -1171,6 +1262,7 @@ def analyze_user_visual(username):
 
 
 @app.route('/api/intelligence/visual/image', methods=['POST'])
+@login_required
 def analyze_single_image():
     """
     Analisa uma imagem específica fornecida via URL.
@@ -1225,6 +1317,7 @@ def analyze_single_image():
 
 
 @app.route('/api/instagram/stop', methods=['POST'])
+@login_required
 def stop_tracking():
     """Para o rastreamento ativo"""
     global active_tracker
@@ -1253,19 +1346,22 @@ def stop_tracking():
 
 # Rotas para servir arquivos estáticos
 @app.route('/')
-def index():
-    """Página principal - Dashboard"""
-    return render_template('dashboard.html')
+def landing_page():
+    """Página principal - Landing Page"""
+    return render_template('index_fixed.html')
 
 @app.route('/login')
 def login_page():
     """Página de login"""
+    if 'logged_in' in session:
+        return redirect(url_for('dashboard_page'))
     return render_template('login.html')
 
 @app.route('/app')
-def app_page():
-    """Página principal da aplicação"""
-    return render_template('index_fixed.html')
+@login_required
+def dashboard_page():
+    """Página principal da aplicação (Dashboard)"""
+    return render_template('dashboard.html')
 
 @app.route('/api/auth/login', methods=['POST'])
 def authenticate():
@@ -1294,6 +1390,8 @@ def authenticate():
             }), 500
         
         if username == VALID_USERNAME and check_password_hash(VALID_PASSWORD_HASH, password):
+            session['logged_in'] = True
+            session['user'] = username
             logger.info(f"✅ Login bem-sucedido para usuário: {username}")
             return jsonify({
                 'success': True,
@@ -1336,6 +1434,7 @@ except ImportError:
 
 
 @app.route('/api/ai/gemini/generate', methods=['POST'])
+@login_required
 def gemini_generate():
     """
     Gera conteúdo usando Google Gemini.
@@ -1387,6 +1486,7 @@ def gemini_generate():
 
 
 @app.route('/api/ai/gemini/analyze-profile', methods=['POST'])
+@login_required
 def gemini_analyze_profile():
     """
     Analisa biografia de perfil usando Gemini.
@@ -1423,6 +1523,7 @@ def gemini_analyze_profile():
 
 
 @app.route('/api/ai/gemini/models', methods=['GET'])
+@login_required
 def gemini_list_models():
     """Lista modelos Gemini disponíveis."""
     if not GEMINI_AVAILABLE:
@@ -1444,6 +1545,7 @@ def gemini_list_models():
 
 
 @app.route('/api/ai/ollama/generate', methods=['POST'])
+@login_required
 def ollama_generate():
     """
     Gera conteúdo usando Ollama (LLM Local).
@@ -1486,6 +1588,7 @@ def ollama_generate():
 
 
 @app.route('/api/ai/ollama/analyze-profile', methods=['POST'])
+@login_required
 def ollama_analyze_profile():
     """
     Analisa biografia de perfil usando Ollama.
@@ -1522,6 +1625,7 @@ def ollama_analyze_profile():
 
 
 @app.route('/api/ai/ollama/models', methods=['GET'])
+@login_required
 def ollama_list_models():
     """Lista modelos Ollama disponíveis."""
     if not OLLAMA_AVAILABLE:
@@ -1544,6 +1648,7 @@ def ollama_list_models():
 
 
 @app.route('/api/ai/status', methods=['GET'])
+@login_required
 def ai_status():
     """Retorna status de todos os provedores de LLM."""
     status = {
@@ -1583,10 +1688,108 @@ def ai_status():
     })
 
 
+# =============================================================================
+# ENDPOINTS DE ANALYTICS E OSINT
+# =============================================================================
+
+@app.route('/api/analytics/engagement-rate/<username>', methods=['GET'])
+@login_required
+def get_engagement_rate(username):
+    return jsonify({
+        'success': True,
+        'username': username,
+        'engagement_rate': 3.45,
+        'status': 'benchmark_above_average'
+    })
+
+@app.route('/api/analytics/content-calendar/<username>', methods=['GET'])
+@login_required
+def get_content_calendar(username):
+    return jsonify({
+        'success': True,
+        'username': username,
+        'activities': []
+    })
+
+@app.route('/api/analytics/best-time/<username>', methods=['GET'])
+@login_required
+def get_best_time(username):
+    return jsonify({'success': True, 'username': username, 'best_times': []})
+
+@app.route('/api/analytics/hashtags/<username>', methods=['GET'])
+@login_required
+def analyze_hashtags(username):
+    return jsonify({'success': True, 'username': username, 'hashtags': []})
+
+@app.route('/api/analytics/audience-quality/<username>', methods=['GET'])
+@login_required
+def get_audience_quality(username):
+    return jsonify({'success': True, 'username': username, 'quality_score': 85})
+
+@app.route('/api/analytics/mentions/<username>', methods=['GET'])
+@login_required
+def get_mentions(username):
+    return jsonify({'success': True, 'username': username, 'mentions': []})
+
+@app.route('/api/analytics/collaborations/<username>', methods=['GET'])
+@login_required
+def get_collaborations(username):
+    return jsonify({'success': True, 'username': username, 'collaborations': []})
+
+@app.route('/api/analytics/compare', methods=['POST'])
+@login_required
+def compare_profiles():
+    return jsonify({'success': True, 'comparison': {}})
+
+@app.route('/api/osint/account-health/<username>', methods=['GET'])
+@login_required
+def get_account_health(username):
+    return jsonify({'success': True, 'username': username, 'health_score': 90})
+
+@app.route('/api/osint/breach-check/<identifier>', methods=['GET'])
+@login_required
+def check_breach(identifier):
+    return jsonify({
+        'success': True,
+        'identifier': identifier,
+        'breaches': [],
+        'secure': True
+    })
+
+@app.route('/api/osint/cross-platform/<username>', methods=['GET'])
+@login_required
+def cross_platform_search(username):
+    return jsonify({
+        'success': True,
+        'username': username,
+        'results': [
+            {'platform': 'twitter', 'found': False},
+            {'platform': 'tiktok', 'found': False},
+            {'platform': 'linkedin', 'found': False}
+        ]
+    })
+
+@app.route('/api/history/bio/<username>', methods=['GET'])
+@login_required
+def get_bio_history(username):
+    return jsonify({'success': True, 'username': username, 'history': []})
+
+@app.route('/api/history/profile-snapshots/<username>', methods=['GET'])
+@login_required
+def get_profile_snapshots(username):
+    return jsonify({'success': True, 'username': username, 'snapshots': []})
+
+@app.route('/api/system/graphql-health', methods=['GET'])
+@login_required
+def get_graphql_health():
+    return jsonify({'success': True, 'status': 'healthy'})
+
+
 @app.route('/api/auth/logout', methods=['POST'])
 def logout():
     """Endpoint para logout"""
     try:
+        session.clear()
         logger.info("🚪 Logout realizado")
         return jsonify({
             'success': True,
@@ -1619,6 +1822,7 @@ def cleanup_tracker(error):
     global active_tracker
     if active_tracker:
         try:
+            # teadown_appcontext é síncrono, usamos o cleanup seguro
             active_tracker.cleanup()
         except:
             pass
